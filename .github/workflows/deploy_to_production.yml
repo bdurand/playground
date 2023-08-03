@@ -2,7 +2,7 @@ name: Deploy To Production
 
 on:
   release:
-    types: published
+    types: released
 
 jobs:
   deploy:
