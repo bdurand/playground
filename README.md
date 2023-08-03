@@ -1,2 +1,3 @@
-# playground
+# Playground
+
 Playground for testing GitHub actions and integrations
