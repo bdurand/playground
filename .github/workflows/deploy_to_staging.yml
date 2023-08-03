@@ -1,0 +1,33 @@
+name: Deploy To Staging
+
+on:
+  push:
+    branches:
+      - main
+      - prerelease
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for prerelease branch
+        id: check_for_cutover
+        if: github.event.ref == 'refs/heads/main'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            try {
+              const branchInfo = await github.repo.getBranch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                branch: 'prerelease',
+              });
+              core.setOutput('prerelease', 'true')
+            } catch (error) {
+              core.setOutput('prerelease', 'false')
+            }
+      - name: Run deployment
+        if: steps.check_for_cutover.outputs.prerelease == 'false' || github.event.ref == 'refs/heads/prerelease'
+        run: |
+          echo "Deploying ${GITHUB_REF} to staging (${GITHUB_SHA})"

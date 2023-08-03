@@ -1,0 +1,14 @@
+name: Deploy To Production
+
+on:
+  release:
+    types: published
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run deployment
+        run: |
+          echo "Deploying ${GITHUB_REF} to production (${GITHUB_SHA})"

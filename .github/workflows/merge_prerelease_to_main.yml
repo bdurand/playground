@@ -1,0 +1,20 @@
+name: Merge prelease Back To main
+
+on:
+  push:
+    branches:
+      - prerelease
+
+jobs:
+  deploy:
+    name: Merge
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Run deployment
+        run: |
+          git fetch main
+          git checkout main
+          git merge prerelease
+          git push origin main
