@@ -80,6 +80,7 @@ jobs:
               head: context.repo.owner + ':' + process.env.PRE_RELEASE_BRANCH
             })[0]?.data;
 
+            console.log(pullRequest)
             if (pullRequest) {
               core.warning('Pull request already exists: ' + pullRequest.html_url);
             } else {
