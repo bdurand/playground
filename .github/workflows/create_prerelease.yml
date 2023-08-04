@@ -51,7 +51,6 @@ jobs:
               });
               core.warning('Pre-release branch '+ branchName + ' already exists');
             } catch(error) {
-              console.log(error);
               await github.request('POST /repos/{owner}/{repo}/git/refs', {
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -90,7 +89,6 @@ jobs:
             let pullRequest = pullRequests.data[0];
 
             if (pullRequest) {
-              console.log("Existing pull request", pullRequest)
               core.warning('Pull request already exists: ' + pullRequest.html_url);
             } else {
               const createResponse = await github.request('POST /repos/{owner}/{repo}/pulls', {
@@ -103,7 +101,6 @@ jobs:
                 body: 'This is a pre-release pull request. It will be merged when the release is ready.'
               });
               pullRequest = createResponse.data;
-              console.log("New Pull Request", pullRequest)
               core.notice('Created pull request: ' + pullRequest.html_url);
             }
 

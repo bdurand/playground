@@ -26,8 +26,19 @@ runs:
           issues.data.forEach(issue => {
             console.log(issue);
             if (issue.title.startsWith('Pre-release')) {
-              core.setOutput('branch_name', issue.head.ref);
-              core.setOutput('pull_request_url', issue.html_url);
-              return;
+              try {
+                const pullRequest = await github.request('GET /repos/{owner}/{repo}/pulls/{pull_number}', {
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: issue.number
+                });
+
+                console.log(pullRequest.data);
+                core.setOutput('branch_name', pullRequest.data.head.ref);
+                core.setOutput('pull_request_url', pullRequest.data.html_url);
+                return;
+              } catch(error) {
+                core.warning('Found non-pull request labeled as Pre-release. Ignoring.');
+              }
             }
           });
