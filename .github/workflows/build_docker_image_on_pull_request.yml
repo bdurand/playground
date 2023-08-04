@@ -13,6 +13,19 @@ jobs:
     name: Build Docker Image
     runs-on: ubuntu-latest
     steps:
+      - name: Check for build labels
+        id: check_labels
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const labels = context.payload.pull_request.labels.map(label => label.name)
+            const buildLabel = labels.find(label => label === 'Build Docker Image')
+            const qaReadyLabel = labels.find(label => label === 'QA Ready')
+            if (buildLabel || qaReadyLabel) {
+              core.setOutput('build', 'true')
+            } else {
+              core.setOutput('build', 'false')
+            }
       - name: Remove Build Label
         if: github.event.label.name == 'Build Docker Image'
         uses: actions/github-script@v6
@@ -26,5 +39,6 @@ jobs:
             })
             console.log('Remove ' + context.payload.label.name + ' label')
       - name: Build Image
+        if: steps.check_labels.outputs.build == 'true'
         run: |
           echo "Build Docker image"
