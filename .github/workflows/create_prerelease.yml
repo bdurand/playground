@@ -90,7 +90,7 @@ jobs:
               const createResponse = await github.request('POST /repos/{owner}/{repo}/pulls', {
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                title: 'Pre-release',
+                title: 'Pre-release ' + process.env.RELEASE,
                 head: process.env.PRE_RELEASE_BRANCH,
                 base: 'main',
                 labels: ['Pre-release'],
