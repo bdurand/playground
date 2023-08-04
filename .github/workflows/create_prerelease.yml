@@ -30,12 +30,10 @@ jobs:
         if: steps.check_pull_request.outputs.branch
         env:
           PULL_REQUEST_URL: ${{ steps.check_pull_request.outputs.url }}
-          PULL_REQUEST_BRANCH: ${{ steps.check_pull_request.outputs.branch }}
         uses: actions/github-script@v6
         with:
           script: |
-            console.log(process.env)
-            core.setFailed('A pre-release pull request already exists: ' + process.env.PULL_REQUEST_URL + ' ' + process.env.PULL_REQUEST_BRANCH);
+            core.setFailed('A pre-release pull request already exists: ' + process.env.PULL_REQUEST_URL);
       - name: Create branch
         id: create_branch
         uses: actions/github-script@v6

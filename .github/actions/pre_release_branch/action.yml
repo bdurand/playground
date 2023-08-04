@@ -4,13 +4,13 @@ description: Gets the name of the current pre-release branch.
 outputs:
   branch:
     description: The name of the current pre-release branch.
-    value: ${{ steps.pre_release_pull_request.outputs.branch_name }}
+    value: ${{ steps.pre_release_pull_request.outputs.branch }}
   sha:
     description: The SHA of the current pre-release branch.
     value: ${{ steps.pre_release_pull_request.outputs.sha }}
   url:
     description: The URL of the current pre-release pull request.
-    value: ${{ steps.pre_release_pull_request.outputs.pull_request_url }}
+    value: ${{ steps.pre_release_pull_request.outputs.url }}
 
 runs:
   using: "composite"
@@ -42,7 +42,7 @@ runs:
               pull_number: preReleaseIssue.number
             });
 
-            core.setOutput('branch_name', pullRequest.data.head.ref);
+            core.setOutput('branch', pullRequest.data.head.ref);
             core.setOutput('sha', pullRequest.data.head.sha);
             core.setOutput('url', pullRequest.data.html_url);
           } catch(error) {
