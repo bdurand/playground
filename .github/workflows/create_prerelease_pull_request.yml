@@ -28,7 +28,7 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            branchName = 'pre-release-' + (new Date()).toISOString().slice(0, 10);
+            const branchName = 'pre-release-' + (new Date()).toISOString().slice(0, 10);
             try {
               const branchInfo = await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
                 owner: context.repo.owner,
