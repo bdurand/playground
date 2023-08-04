@@ -10,11 +10,18 @@ jobs:
     name: Merge
     runs-on: ubuntu-latest
     steps:
+      - name: Get commit count
+        id: commit_count
+        uses: actions/github-script@v6
+        with:
+          script: |
+            core.setOutput('count', github.event.commits.length + 1)
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: ${{ steps.commit_count.outputs.count }}
       - name: Merge
         run: |
-          cat ${GITHUB_EVENT_PATH}
           git fetch --unshallow origin prerelease:prerelease
           git fetch origin main:main
           git checkout main
