@@ -28,6 +28,7 @@ jobs:
               }
             });
       - name: Create branch
+        id: create_branch
         uses: actions/github-script@v6
         with:
           result-encoding: string
@@ -50,13 +51,16 @@ jobs:
                 sha: context.sha
               });
               core.notice('Created pre-release branch: ' + branchName);
+              core.setOutput('created', 'true');
             }
             return branchName;
       - name: Checkout branch
+        if: steps.create_branch.outputs.created == 'true'
         uses: actions/checkout@v3
         with:
           ref: ${{ env.PRE_RELEASE_BRANCH }}
       - name: Touch release
+        if: steps.create_branch.outputs.created == 'true'
         run: |
           echo ${PRE_RELEASE_BRANCH} > RELEASE
           git config user.email "releasebot@example.com"
