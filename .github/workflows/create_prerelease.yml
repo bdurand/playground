@@ -1,0 +1,36 @@
+name: Create Preprelease
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Cutover
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Draft Release
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const releases = await github.request('GET /repos/{owner}/{repo}/releases', {
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+
+            let prerelease = false
+            for (const release of releases.data) {
+              if (release.draft && release.name === 'prerelease') {
+                prerelease = true
+                return
+              }
+            }
+
+            if (!prerelease) {
+              await github.request('POST /repos/{owner}/{repo}/releases',
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: 'prerelease',
+                draft: true,
+                prerelease: true
+              })
+            }
