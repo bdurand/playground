@@ -87,7 +87,7 @@ jobs:
               console.log("Existing pull request", pullRequest)
               core.warning('Pull request already exists: ' + pullRequest.html_url);
             } else {
-              pullRequest = await github.request('POST /repos/{owner}/{repo}/pulls', {
+              const createResponse = await github.request('POST /repos/{owner}/{repo}/pulls', {
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 title: 'Pre-release',
@@ -96,6 +96,7 @@ jobs:
                 labels: ['Pre-release'],
                 body: 'This is a pre-release pull request. It will be merged when the release is ready.'
               });
+              pullRequest = createResponse.data;
               console.log("New Pull Request", pullRequest)
               core.notice('Created pull request: ' + pullRequest.html_url);
             }
