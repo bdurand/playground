@@ -14,7 +14,6 @@ jobs:
     steps:
       - name: Get branch to build
         id: ref_to_build
-        if: github.event.ref == 'refs/heads/main'
         uses: actions/github-script@v6
         with:
           script: |
@@ -33,15 +32,15 @@ jobs:
 
             const hotfixBranch = await getBranch('hotfix');
             if (hotfixBranch) {
-              return 'hotfix';
+              return 'refs/heads/hotfix';
             }
 
             const preReleaseBranch = await getBranch('pre-release');
             if (preReleaseBranch) {
-              return 'pre-release';
+              return 'refs/heads/pre-release';
             }
 
-            return 'main';
+            return 'refs/heads/main';
       - name: Build Docker image
         if: github.event.ref == steps.ref_to_build.outputs.result
         run: |

@@ -1,4 +1,4 @@
-name: End Cutover
+name: "Cutover: End"
 
 on:
   workflow_dispatch:
@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    concurrency:
+      group: cutover
     steps:
       - name: Delete pre-release branch
         uses: actions/github-script@v6
@@ -20,7 +22,8 @@ jobs:
                 repo: context.repo.repo,
                 branch: 'pre-release',
               });
-              core.info('Deleted pre-release branch')
+              core.info('Deleted pre-release branch');
             } catch (error) {
-              core.warning('Not currently in cutover; pre-release branch does not exist')
+              console.error(error);
+              core.warning('Not currently in cutover; pre-release branch does not exist');
             }

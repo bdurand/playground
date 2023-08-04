@@ -1,4 +1,4 @@
-name: Start Cutover
+name: "Cutover: Start"
 
 on:
   workflow_dispatch:
@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    concurrency:
+      group: cutover
     steps:
       - name: Create pre-release branch
         uses: actions/github-script@v6
@@ -20,7 +22,7 @@ jobs:
                 repo: context.repo.repo,
                 branch: 'pre-release',
               });
-              core.warning('Already in cutover')
+              core.setFailed('Already in cutover');
             } catch (error) {
               await github.request('POST /repos/{owner}/{repo}/git/refs', {
                 owner: context.repo.owner,
@@ -28,5 +30,5 @@ jobs:
                 ref: 'refs/heads/pre-release',
                 sha: context.sha
               });
-              core.info('Created pre-release branch')
+              core.info('Created pre-release branch');
             }
