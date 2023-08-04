@@ -35,14 +35,12 @@ jobs:
             const branchName = 'pre-release-' + (new Date()).toISOString().slice(0, 10);
             core.exportVariable('PRE_RELEASE_BRANCH', branchName);
             try {
-              console.log('Checking if branch ' + branchName + ' exists');
               const branchInfo = await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 branch: branchName
               });
-              console.log(branchInfo.data)
-              core.warn('Branch '+ branchName + ' already exists');
+              core.warning('Branch '+ branchName + ' already exists');
             } catch(error) {
               console.log(error);
               await github.request('POST /repos/{owner}/{repo}/git/refs', {
