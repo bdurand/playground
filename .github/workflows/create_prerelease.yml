@@ -7,6 +7,8 @@ jobs:
   build:
     name: Cutover
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Create Draft Release
         uses: actions/github-script@v6
