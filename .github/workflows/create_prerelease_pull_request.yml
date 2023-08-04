@@ -73,12 +73,15 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            let pullRequest = await github.request('GET /repos/{owner}/{repo}/pulls', {
+            let pullRequests = await github.request('GET /repos/{owner}/{repo}/pulls', {
               owner: context.repo.owner,
               repo: context.repo.repo,
               state: 'open',
               head: context.repo.owner + ':' + process.env.PRE_RELEASE_BRANCH
-            })[0];
+            });
+            console.log(pullRequests);
+            let pullRequest = pullRequests.data[0]?.data;
+            console.log(pullRequest);
 
             console.log(pullRequest);
             if (pullRequest) {
