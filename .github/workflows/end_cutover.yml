@@ -26,9 +26,9 @@ jobs:
               core.setFailed('Not currently in cutover; pre-release branch does not exist');
             }
 
-            await github.request('DELETE /repos/{owner}/{repo}/git/refs', {
+            await github.request('DELETE /repos/{owner}/{repo}/git/refs/heads/{branch}', {
               owner: context.repo.owner,
               repo: context.repo.repo,
-              ref: 'refs/heads/pre-release'
+              branch: 'pre-release'
             });
             core.info('Deleted pre-release branch');
