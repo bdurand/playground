@@ -69,22 +69,35 @@ jobs:
           git commit -m "Set release"
           git push origin ${PRE_RELEASE_BRANCH}
       - name: Create pull request
+        if: steps.check_pull_request.outputs.exists != 'true'
         uses: actions/github-script@v6
         with:
           script: |
-            const branchName = process.env.PRE_RELEASE_BRANCH;
-            try {
-              const pullRequest = await github.request('POST /repos/{owner}/{repo}/pulls', {
+            let pullRequest = await github.request('GET /repos/{owner}/{repo}/pulls', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              head: context.repo.owner + ':' + process.env.PRE_RELEASE_BRANCH
+            })[0]?.data;
+
+            if (pullRequest) {
+              core.warning('Pull request already exists: ' + pullRequest.html_url);
+            } else {
+              pullRequest = await github.request('POST /repos/{owner}/{repo}/pulls', {
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 title: 'Pre-release',
-                head: branchName,
+                head: process.env.PRE_RELEASE_BRANCH,
                 base: 'main',
                 labels: ['Pre-release'],
                 body: 'This is a pre-release pull request. It will be merged when the release is ready.'
-              });
-              core.notice('Created pull request: ' + pullRequest.data.html_url);
-            } catch(error) {
-              console.log(error);
-              core.setFailed('Failed to create pull request: ' + error.message);
+              }).data;
+              core.notice('Created pull request: ' + pullRequest.html_url);
             }
+
+            await githhub.request('POST /repos/{owner}/{repo}/issues/{issue_number}/labels', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pullRequest.number,
+              labels: ['Pre-release']
+            });
