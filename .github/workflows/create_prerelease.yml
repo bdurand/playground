@@ -2,38 +2,44 @@ name: Create Pre-Release
 
 on:
   workflow_dispatch:
+    inputs:
+      release_candidate:
+        description: 'Release candidate'
+        required: true
+        default: '1'
 
 jobs:
   create_pull_request:
+    env:
+      RELEASE_CANDIDATE: ${{ inputs.release_candidate }}
+      RELEASE_REF: ${{ inputs.release_ref }}
     name: Create Pull Request
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
     steps:
-      - name: Check for existing pull request
+      - name: Get actions
+        uses: actions/checkout@v3
+        with:
+          sparse-checkout: .github
+      - name: Get existing pull request
+        id: check_pull_request
+        uses: ./.github/actions/pre_release_branch
+      - name: Abort if pre-release pull request exists
         uses: actions/github-script@v6
         with:
           script: |
-            const issues = await github.request('GET /repos/{owner}/{repo}/issues', {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'open',
-              labels: 'Pre-release'
-            });
-            issues.data.forEach(issue => {
-              console.log(issue);
-              if (issue.title === 'Pre-release') {
-                core.setFailed('A pre-release pull request already exists: ' + issue.html_url);
-              }
-            });
+            if (steps.check_pull_request.outputs.branch_name) {
+              core.setFailed('A pre-release pull request already exists: ' + steps.check_pull_request.outputs.url);
+            }
       - name: Create branch
         id: create_branch
         uses: actions/github-script@v6
         with:
           result-encoding: string
           script: |
-            const release = (new Date()).toISOString().slice(0, 10);
+            const release = (new Date()).toISOString().slice(0, 10) + '.rc' + process.env.RELEASE_CANDIDATE;
             core.exportVariable('RELEASE', release);
             const branchName = 'pre-release-' + release;
             core.exportVariable('PRE_RELEASE_BRANCH', branchName);
