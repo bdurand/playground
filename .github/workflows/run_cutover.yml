@@ -1,4 +1,4 @@
-name: Cutover
+name: Run Cutover
 
 on:
   workflow_dispatch:

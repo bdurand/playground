@@ -16,6 +16,7 @@ jobs:
     steps:
       - name: Check for build tags
         id: check_tags
+        if: github.event_name == 'pull_request'
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
