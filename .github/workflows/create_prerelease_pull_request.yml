@@ -33,7 +33,9 @@ jobs:
         with:
           result-encoding: string
           script: |
-            const branchName = 'pre-release-' + (new Date()).toISOString().slice(0, 10);
+            const release = (new Date()).toISOString().slice(0, 10);
+            core.exportVariable('RELEASE', release);
+            const branchName = 'pre-release-' + release;
             core.exportVariable('PRE_RELEASE_BRANCH', branchName);
             try {
               const branchInfo = await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
@@ -62,7 +64,7 @@ jobs:
       - name: Touch release
         if: steps.create_branch.outputs.created == 'true'
         run: |
-          echo ${PRE_RELEASE_BRANCH} > RELEASE
+          echo ${RELEASE} > RELEASE
           git config user.email "releasebot@example.com"
           git config user.name "ReleaseBot"
           git add RELEASE
