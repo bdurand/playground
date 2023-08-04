@@ -20,15 +20,15 @@ jobs:
               await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                branch: 'pre-release',
+                branch: 'pre-release'
               });
             } catch (error) {
               core.setFailed('Not currently in cutover; pre-release branch does not exist');
             }
 
-            await github.request('DELETE /repos/{owner}/{repo}/branches/{branch}', {
+            await github.request('DELETE /repos/{owner}/{repo}/git/refs', {
               owner: context.repo.owner,
               repo: context.repo.repo,
-              branch: 'pre-release',
+              ref: 'refs/heads/pre-release'
             });
             core.info('Deleted pre-release branch');
