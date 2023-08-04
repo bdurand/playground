@@ -1,4 +1,4 @@
-name: Create Pre-Release Pull Request
+name: Create Pre-Release
 
 on:
   workflow_dispatch:
@@ -84,6 +84,7 @@ jobs:
             let pullRequest = pullRequests.data[0];
 
             if (pullRequest) {
+              console.log("Existing pull request", pullRequest)
               core.warning('Pull request already exists: ' + pullRequest.html_url);
             } else {
               pullRequest = await github.request('POST /repos/{owner}/{repo}/pulls', {
@@ -95,6 +96,7 @@ jobs:
                 labels: ['Pre-release'],
                 body: 'This is a pre-release pull request. It will be merged when the release is ready.'
               }).data;
+              console.log("New Pull Request", pullRequest)
               core.notice('Created pull request: ' + pullRequest.html_url);
             }
 
