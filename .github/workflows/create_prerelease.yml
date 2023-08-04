@@ -10,9 +10,9 @@ on:
 
 jobs:
   create_pull_request:
+    concurrency: create_pre_release
     env:
       RELEASE_CANDIDATE: ${{ inputs.release_candidate }}
-      RELEASE_REF: ${{ inputs.release_ref }}
     name: Create Pull Request
     runs-on: ubuntu-latest
     permissions:
