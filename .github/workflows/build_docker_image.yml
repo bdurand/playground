@@ -1,0 +1,31 @@
+name: Build Docker Image
+
+on:
+  pull_request:
+    types:
+      - labeled
+      - opened
+      - reopened
+      - synchronize
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for build tags
+        id: check_tags
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            if (github.payload.pull_request.labels.some(label => label.name === 'Build Docker Image')) {
+              core.setOutput('build', 'true')
+            } else {
+              core.setOutput('build', 'false')
+            }
+      - name: Build Image
+        if: steps.check_tags.outputs.build == 'true' || github.event_name == 'workflow_dispatch'
+        run: |
+          echo "Build Docker image"
