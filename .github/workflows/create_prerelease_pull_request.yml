@@ -73,12 +73,13 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            let pullRequest = await github.request('GET /repos/{owner}/{repo}/pulls', {
+            const pullRequests = await github.request('GET /repos/{owner}/{repo}/pulls', {
               owner: context.repo.owner,
               repo: context.repo.repo,
               state: 'open',
               head: context.repo.owner + ':' + process.env.PRE_RELEASE_BRANCH
-            }).data[0];
+            });
+            let pullRequest = pullRequests.data[0];
 
             if (pullRequest) {
               core.warning('Pull request already exists: ' + pullRequest.html_url);
