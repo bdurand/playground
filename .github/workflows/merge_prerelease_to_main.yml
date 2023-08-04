@@ -9,12 +9,19 @@ jobs:
   deploy:
     name: Merge
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Run deployment
-        run: |
-          git pull origin main
-          git checkout main
-          git merge prerelease
-          git push origin main
+      - name: Merge to main
+        id: commit_count
+        uses: actions/github-script@v6
+        with:
+          script: |
+            await octokit.request('POST /repos/{owner}/{repo}/merges', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              base: 'main',
+              head: 'prelease',
+              commit_message: 'Merged prelease to main.'
+            })

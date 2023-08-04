@@ -1,0 +1,32 @@
+name: Run Cutover
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Cutover
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Create Cutover Branch
+        uses: actions/github-script@v6
+        with:
+          script: |
+            try {
+              const branchInfo = await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                branch: 'cutover',
+              });
+              console.log('Already in cutover')
+            } catch (error) {
+              await github.request('POST /repos/{owner}/{repo}/git/refs', {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: 'refs/heads/cutover',
+                sha: context.sha,
+              });
+              console.log('Created cutover branch')
+            }
