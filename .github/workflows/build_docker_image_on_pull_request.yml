@@ -12,6 +12,8 @@ jobs:
   build:
     name: Build Docker Image
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     steps:
       - name: Check for build labels
         id: check_labels
