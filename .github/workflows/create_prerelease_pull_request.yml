@@ -21,8 +21,7 @@ jobs:
               state: 'open',
               labels: 'Pre-release'
             });
-            console.log(issues);
-            issues.forEach(issue => {
+            issues.data.forEach(issue => {
               console.log(issue);
               if (issue.title === 'Pre-release') {
                 core.setFailed('Pull request already exists: ' + issue.html_url);
