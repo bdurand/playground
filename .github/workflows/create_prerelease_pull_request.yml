@@ -73,17 +73,14 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            let pullRequests = await github.request('GET /repos/{owner}/{repo}/pulls', {
+            let pullRequest = await github.request('GET /repos/{owner}/{repo}/pulls', {
               owner: context.repo.owner,
               repo: context.repo.repo,
               state: 'open',
               head: context.repo.owner + ':' + process.env.PRE_RELEASE_BRANCH
-            });
-            console.log(pullRequests);
-            let pullRequest = pullRequests.data[0];
+            }).data[0];
 
             if (pullRequest) {
-              console.log("************* here *************");
               core.warning('Pull request already exists: ' + pullRequest.html_url);
             } else {
               pullRequest = await github.request('POST /repos/{owner}/{repo}/pulls', {
@@ -98,7 +95,7 @@ jobs:
               core.notice('Created pull request: ' + pullRequest.html_url);
             }
 
-            await githhub.request('POST /repos/{owner}/{repo}/issues/{issue_number}/labels', {
+            await github.request('POST /repos/{owner}/{repo}/issues/{issue_number}/labels', {
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: pullRequest.number,
