@@ -24,7 +24,7 @@ jobs:
             issues.data.forEach(issue => {
               console.log(issue);
               if (issue.title === 'Pre-release') {
-                core.setFailed('Pull request already exists: ' + issue.html_url);
+                core.setFailed('A pre-release pull request already exists: ' + issue.html_url);
               }
             });
       - name: Create branch
@@ -41,7 +41,7 @@ jobs:
                 repo: context.repo.repo,
                 branch: branchName
               });
-              core.warning('Branch '+ branchName + ' already exists');
+              core.warning('Pre-release branch '+ branchName + ' already exists');
             } catch(error) {
               console.log(error);
               await github.request('POST /repos/{owner}/{repo}/git/refs', {
