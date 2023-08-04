@@ -21,34 +21,37 @@ jobs:
               labels: 'Pre-release'
             });
             if (pullRequests.data.length > 0) {
-              console.log('Pull request already exists: ' + pullRequests.data[0].html_url);
-              process.exit(1);
+              core.setFailed('Pull request already exists: ' + pullRequests.data[0].html_url);
             }
       - name: Create branch
         uses: actions/github-script@v6
         with:
+          result-encoding: string
           script: |
             const branchName = 'pre-release-' + (new Date()).toISOString().slice(0, 10);
+            core.exportVariable('PRE_RELEASE_BRANCH', branchName);
             try {
               const branchInfo = await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 branch: branchName
               });
-              console.log('Branch '+ branchName + ' already exists');
+              core.notice('Branch '+ branchName + ' already exists');
             } catch(error) {
-              //await github.request('POST /repos/{owner}/{repo}/git/refs', {
-              //  owner: context.repo.owner,
-              //  repo: context.repo.repo,
-              //  ref: 'refs/heads/' + branchName,
-              //  sha: context.sha
-              //});
-              console.log('Created pre-release branch: ' + branchName);
+              await github.request('POST /repos/{owner}/{repo}/git/refs', {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: 'refs/heads/' + branchName,
+                sha: context.sha
+              });
+              core.notice('Created pre-release branch: ' + branchName);
             }
+            return branchName;
       - name: Create pull request
         uses: actions/github-script@v6
         with:
           script: |
+            const branchName = process.env.PRE_RELEASE_BRANCH;
             const pullRequest = await github.request('POST /repos/{owner}/{repo}/pulls', {
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -58,4 +61,4 @@ jobs:
               labels: ['Pre-release'],
               body: 'This is a pre-release pull request. It will be merged when the release is ready.'
             });
-            console.log('Created pull request: ' + pullRequest.data.html_url);
+            core.notice('Created pull request: ' + pullRequest.data.html_url);
