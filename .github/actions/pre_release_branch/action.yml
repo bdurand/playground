@@ -5,7 +5,7 @@ outputs:
   branch_name:
     description: The name of the current pre-release branch.
     value: ${{ steps.pre_release_pull_request.outputs.branch_name }}
-  pull_request_url:
+  url:
     description: The URL of the current pre-release pull request.
     value: ${{ steps.pre_release_pull_request.outputs.pull_request_url }}
 
@@ -23,22 +23,26 @@ runs:
             state: 'open',
             labels: 'Pre-release'
           });
-          issues.data.forEach(issue => {
-            console.log(issue);
-            if (issue.title.startsWith('Pre-release')) {
-              try {
-                const pullRequest = await github.request('GET /repos/{owner}/{repo}/pulls/{pull_number}', {
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  pull_number: issue.number
-                });
 
-                console.log(pullRequest.data);
-                core.setOutput('branch_name', pullRequest.data.head.ref);
-                core.setOutput('pull_request_url', pullRequest.data.html_url);
-                return;
-              } catch(error) {
-                core.warning('Found non-pull request labeled as Pre-release. Ignoring.');
-              }
-            }
+          const preReleaseIssue = issues.data.find(issue => {
+            return issue.title.startsWith('Pre-release'));
           });
+
+          if (!preReleaseIssue) {
+            return;
+          }
+
+          try {
+            const pullRequest = await github.request('GET /repos/{owner}/{repo}/pulls/{pull_number}', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: preReleaseIssue.number
+            });
+
+            console.log(pullRequest.data);
+            core.setOutput('branch_name', pullRequest.data.head.ref);
+            core.setOutput('url', pullRequest.data.html_url);
+          } catch(error) {
+            core.setFailed('Found non-pull request issue with the Pre-release label. ' + preReleaseIssue.html_url);
+          }
+
