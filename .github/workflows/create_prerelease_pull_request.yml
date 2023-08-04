@@ -58,12 +58,11 @@ jobs:
       - name: Touch release
         run: |
           echo ${PRE_RELEASE_BRANCH} > RELEASE
+          git config user.email "releasebot@example.com"
+          git config user.name "ReleaseBot"
           git add RELEASE
-          echo "add RELEASE"
-          git commit -m "Set release" --author="ReleaseBot <releasebot@example.com>"
-          echo "commit"
+          git commit -m "Set release"
           git push origin ${PRE_RELEASE_BRANCH}
-          echo "push"
       - name: Create pull request
         uses: actions/github-script@v6
         with:
