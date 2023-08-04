@@ -40,7 +40,7 @@ jobs:
                 repo: context.repo.repo,
                 branch: branchName
               });
-              core.notice('Branch '+ branchName + ' already exists');
+              core.warn('Branch '+ branchName + ' already exists');
             } catch(error) {
               await github.request('POST /repos/{owner}/{repo}/git/refs', {
                 owner: context.repo.owner,
@@ -68,13 +68,18 @@ jobs:
         with:
           script: |
             const branchName = process.env.PRE_RELEASE_BRANCH;
-            const pullRequest = await github.request('POST /repos/{owner}/{repo}/pulls', {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: 'Pre-release',
-              head: branchName,
-              base: 'main',
-              labels: ['Pre-release'],
-              body: 'This is a pre-release pull request. It will be merged when the release is ready.'
-            });
-            core.notice('Created pull request: ' + pullRequest.data.html_url);
+            try {
+              const pullRequest = await github.request('POST /repos/{owner}/{repo}/pulls', {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: 'Pre-release',
+                head: branchName,
+                base: 'main',
+                labels: ['Pre-release'],
+                body: 'This is a pre-release pull request. It will be merged when the release is ready.'
+              });
+              core.notice('Created pull request: ' + pullRequest.data.html_url);
+            } catch(error) {
+              console.log(error);
+              core.setFailed('Failed to create pull request: ' + error.message);
+            }
