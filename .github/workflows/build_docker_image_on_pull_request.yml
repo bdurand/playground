@@ -1,10 +1,6 @@
 name: Build Docker Image
 
 on:
-  push:
-    branches:
-      - main
-      - prerelease
   pull_request:
     types:
       - labeled
@@ -16,10 +12,9 @@ jobs:
   build:
     name: Build Docker Image
     runs-on: ubuntu-latest
-    if: github.event.label.name == 'QA Ready' || github.event.label.name == 'Build Docker Image' || github.event.ref == 'refs/heads/prerelease' || github.event.ref == 'refs/heads/main'
     steps:
       - name: Remove Build Label
-        if: github.event.label.name
+        if: github.event.label.name == 'Build Docker Image'
         uses: actions/github-script@v6
         with:
           script: |
@@ -33,6 +28,3 @@ jobs:
       - name: Build Image
         run: |
           echo "Build Docker image"
-      - name: Push Image
-        run: |
-          echo "Push Docker image"

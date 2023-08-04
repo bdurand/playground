@@ -23,10 +23,16 @@ jobs:
                 repo: context.repo.repo,
                 branch: 'prerelease',
               });
+              console.log(branchInfo)
               core.setOutput('prerelease', 'true')
             } catch (error) {
+              console.log(error)
               core.setOutput('prerelease', 'false')
             }
+      - name: Build Docker image
+        if: steps.check_for_cutover.outputs.prerelease == 'false' || github.event.ref == 'refs/heads/prerelease'
+        run: |
+          echo "Build Docker image"
       - name: Run deployment
         if: steps.check_for_cutover.outputs.prerelease == 'false' || github.event.ref == 'refs/heads/prerelease'
         run: |
