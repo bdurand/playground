@@ -35,4 +35,7 @@ jobs:
                 draft: true,
                 prerelease: true
               })
+              console.log('Created draft for prerelease')
+            } else {
+              console.log('Draft for prerelease already exists')
             }
