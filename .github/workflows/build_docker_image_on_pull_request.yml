@@ -35,7 +35,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.payload.pull_request.number,
-              name: context.label.name
+              name: context.payload.label.name
             })
             console.log('Remove ' + context.payload.label.name + ' label')
       - name: Build Image
