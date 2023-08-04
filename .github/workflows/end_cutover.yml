@@ -1,16 +1,16 @@
-name: Revert Cutover
+name: End Cutover
 
 on:
   workflow_dispatch:
 
 jobs:
   build:
-    name: Revert
+    name: End cutover
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - name: Delete Cutover Branch
+      - name: Delete pre-release branch
         uses: actions/github-script@v6
         with:
           script: |
@@ -18,9 +18,9 @@ jobs:
               const branchInfo = await github.request('DELETE /repos/{owner}/{repo}/branches/{branch}', {
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                branch: 'cutover',
+                branch: 'pre-release',
               });
-              console.log('Deleted cutover branch')
+              core.info('Deleted pre-release branch')
             } catch (error) {
-              console.log('Branch did not exist')
+              core.warning('Not currently in cutover; pre-release branch does not exist')
             }

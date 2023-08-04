@@ -1,0 +1,45 @@
+name: Deploy To Staging
+
+on:
+  push:
+    branches:
+      # - main
+      - pre-release-*
+      - hotfix-*
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    concurrency:
+      group: deploy
+    steps:
+      - name: Load local GitHub actions
+        uses: actions/checkout@v3
+        with:
+          sparse-checkout: .github
+      - name: Pre-release branch
+        id: pre_release_branch
+        uses: ./.github/actions/pre_release_branch
+      - name: Check if branch should be deployed to staging
+        id: deploy_branch
+        uses: actions/github-script@v6
+        env:
+          PRE_RELEASE_BRANCH: ${{ steps.pre_release_branch.outputs.branch }}
+        with:
+          script: |
+            if (context.ref === 'refs/heads/main' && !process.env.PRE_RELEASE_BRANCH) {
+              return 'true';
+            } else if (context.ref === 'refs/heads/' + process.env.PRE_RELEASE_BRANCH) {
+              return 'true';
+            } else {
+              return null;
+            }
+      - name: Build Docker image
+        if: steps.deploy_branch.outputs.result == 'true'
+        run: |
+          echo "Build Docker image"
+      - name: Run deployment
+        if: steps.deploy_branch.outputs.result == 'true'
+        run: |
+          echo "Deploying ${GITHUB_REF} to staging (${GITHUB_SHA})"

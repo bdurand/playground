@@ -1,0 +1,28 @@
+name: Merge pre-release To main
+
+on:
+  push:
+    branches:
+      - pre-release
+
+jobs:
+  merge:
+    name: Merge branches
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Merge pre-release to main
+        id: commit_count
+        uses: actions/github-script@v6
+        with:
+          script: |
+            await github.request('POST /repos/{owner}/{repo}/merges', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              base: 'main',
+              head: 'pre-release',
+              commit_message: 'Merged pre-release to main.'
+            });
+            core.info('Merged pre-release to main');

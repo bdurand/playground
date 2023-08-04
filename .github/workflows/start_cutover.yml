@@ -1,16 +1,16 @@
-name: Run Cutover
+name: Start Cutover
 
 on:
   workflow_dispatch:
 
 jobs:
   build:
-    name: Cutover
+    name: Start cutover
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - name: Create Cutover Branch
+      - name: Create pre-release branch
         uses: actions/github-script@v6
         with:
           script: |
@@ -18,15 +18,15 @@ jobs:
               const branchInfo = await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                branch: 'cutover',
+                branch: 'pre-release',
               });
-              console.log('Already in cutover')
+              core.warning('Already in cutover')
             } catch (error) {
               await github.request('POST /repos/{owner}/{repo}/git/refs', {
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                ref: 'refs/heads/cutover',
+                ref: 'refs/heads/pre-release',
                 sha: context.sha
               });
-              console.log('Created cutover branch')
+              core.info('Created pre-release branch')
             }

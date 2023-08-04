@@ -4,34 +4,49 @@ on:
   push:
     branches:
       - main
-      - prerelease
+      - pre-release
+      - hotfix
 
 jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
     steps:
-      - name: Check for prerelease branch
-        id: check_for_cutover
+      - name: Get branch to build
+        id: ref_to_build
         if: github.event.ref == 'refs/heads/main'
         uses: actions/github-script@v6
         with:
           script: |
-            try {
-              const branchInfo = await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                branch: 'prerelease',
-              });
-              core.setOutput('prerelease', 'true')
-            } catch (error) {
-              core.setOutput('prerelease', 'false')
+            async function getBranch(branchName) {
+              try {
+                const { data } = await github.repos.getBranch({
+                  owner: owner,
+                  repo: repo,
+                  branch: branchName,
+                });
+                return data;
+              } catch (error) {
+                return null;
+              }
             }
+
+            const hotfixBranch = await getBranch('hotfix');
+            if (hotfixBranch) {
+              return 'hotfix';
+            }
+
+            const preReleaseBranch = await getBranch('pre-release');
+            if (preReleaseBranch) {
+              return 'pre-release';
+            }
+
+            return 'main';
       - name: Build Docker image
-        if: steps.check_for_cutover.outputs.prerelease == 'false' || github.event.ref == 'refs/heads/prerelease'
+        if: github.event.ref == steps.ref_to_build.outputs.result
         run: |
           echo "Build Docker image"
       - name: Run deployment
-        if: steps.check_for_cutover.outputs.prerelease == 'false' || github.event.ref == 'refs/heads/prerelease'
+        if: github.event.ref == steps.ref_to_build.outputs.result
         run: |
           echo "Deploying ${GITHUB_REF} to staging (${GITHUB_SHA})"

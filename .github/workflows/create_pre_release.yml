@@ -10,7 +10,8 @@ on:
 
 jobs:
   create_pull_request:
-    concurrency: create_pre_release
+    concurrency:
+      group: create_pull_request
     env:
       RELEASE_CANDIDATE: ${{ inputs.release_candidate }}
     name: Create Pull Request
@@ -19,7 +20,7 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - name: Get actions
+      - name: Load local GitHub actions
         uses: actions/checkout@v3
         with:
           sparse-checkout: .github
