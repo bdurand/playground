@@ -25,7 +25,7 @@ runs:
           });
 
           const preReleaseIssue = issues.data.find(issue => {
-            return issue.title.startsWith('Pre-release'));
+            return issue.title.startsWith('Pre-release');
           });
 
           if (!preReleaseIssue) {
