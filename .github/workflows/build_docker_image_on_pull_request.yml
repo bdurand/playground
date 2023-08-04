@@ -34,7 +34,7 @@ jobs:
             github.rest.issues.removeLabel({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: context.pull_request.number,
+              issue_number: context.payload.pull_request.number,
               name: context.label.name
             })
             console.log('Remove ' + context.payload.label.name + ' label')
