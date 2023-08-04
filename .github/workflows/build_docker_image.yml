@@ -21,7 +21,10 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            if (github.payload.pull_request.labels.some(label => label.name === 'Build Docker Image')) {
+            const labels = context.payload.pull_request.labels.map(label => label.name)
+            const buildLabel = labels.find(label => label === 'Build Docker Image')
+            const qaReadyLabel = labels.find(label => label === 'QA Ready')
+            if (buildLabel || qaReadyLabel) {
               core.setOutput('build', 'true')
             } else {
               core.setOutput('build', 'false')
