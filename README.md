@@ -2,4 +2,4 @@
 
 Playground for testing GitHub actions and integrations...
 
-Test 1.
+Test 2.
