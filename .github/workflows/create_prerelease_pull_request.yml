@@ -15,15 +15,18 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const pullRequests = await github.request('GET /repos/{owner}/{repo}/pulls', {
+            const issues = await github.request('GET /repos/{owner}/{repo}/issues', {
               owner: context.repo.owner,
               repo: context.repo.repo,
               state: 'open',
               labels: 'Pre-release'
             });
-            if (pullRequests.data.length > 0) {
-              core.setFailed('Pull request already exists: ' + pullRequests.data[0].html_url);
-            }
+            issues.forEach(issue => {
+              console.log(issue);
+              if (issue.title === 'Pre-release') {
+                core.setFailed('Pull request already exists: ' + issue.html_url);
+              }
+            });
       - name: Create branch
         uses: actions/github-script@v6
         with:
