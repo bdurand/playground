@@ -18,7 +18,7 @@ jobs:
         with:
           script: |
             try {
-              const branchInfo = await github.branches({
+              const branchInfo = await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 branch: 'prerelease',
