@@ -21,6 +21,7 @@ jobs:
               state: 'open',
               labels: 'Pre-release'
             });
+            console.log(issues);
             issues.forEach(issue => {
               console.log(issue);
               if (issue.title === 'Pre-release') {
