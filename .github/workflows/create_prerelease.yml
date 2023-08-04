@@ -27,12 +27,11 @@ jobs:
         id: check_pull_request
         uses: ./.github/actions/pre_release_branch
       - name: Abort if pre-release pull request exists
+        if: steps.check_pull_request.outputs.branch
         uses: actions/github-script@v6
         with:
           script: |
-            if (steps.check_pull_request.outputs.branch_name) {
-              core.setFailed('A pre-release pull request already exists: ' + steps.check_pull_request.outputs.url);
-            }
+            core.setFailed('A pre-release pull request already exists: ' + steps.check_pull_request.outputs.url);
       - name: Create branch
         id: create_branch
         uses: actions/github-script@v6
