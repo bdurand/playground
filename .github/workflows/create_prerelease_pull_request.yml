@@ -35,15 +35,15 @@ jobs:
                 repo: context.repo.repo,
                 branch: branchName
               });
-              console.log('Branch '+ branchName +' already exists')
-            } catch (error) {
-              await github.request('POST /repos/{owner}/{repo}/git/refs', {
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                ref: 'refs/heads/' + branchName,
-                sha: context.sha,
-              });
-              console.log('Created pre-release branch: ' + branchName)
+              //console.log('Branch '+ branchName + ' already exists');
+            } catch(error) {
+              //await github.request('POST /repos/{owner}/{repo}/git/refs', {
+              //  owner: context.repo.owner,
+              //  repo: context.repo.repo,
+              //  ref: 'refs/heads/' + branchName,
+              //  sha: context.sha
+              //});
+              //console.log('Created pre-release branch: ' + branchName);
             }
       - name: Create pull request
         uses: actions/github-script@v6

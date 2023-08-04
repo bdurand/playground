@@ -26,7 +26,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 ref: 'refs/heads/cutover',
-                sha: context.sha,
+                sha: context.sha
               });
               console.log('Created cutover branch')
             }
