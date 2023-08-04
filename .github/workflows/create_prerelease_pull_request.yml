@@ -48,6 +48,16 @@ jobs:
               core.notice('Created pre-release branch: ' + branchName);
             }
             return branchName;
+      - name: Checkout branch
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.PRE_RELEASE_BRANCH }}
+      - name: Touch release
+        run: |
+          echo ${PRE_RELEASE_BRANCH} > RELEASE
+          git add RELEASE
+          git commit -m "Set release"
+          git push origin ${PRE_RELEASE_BRANCH}
       - name: Create pull request
         uses: actions/github-script@v6
         with:
