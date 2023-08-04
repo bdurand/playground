@@ -59,7 +59,7 @@ jobs:
         run: |
           echo ${PRE_RELEASE_BRANCH} > RELEASE
           git add RELEASE
-          git commit -m "Set release"
+          git commit -m "Set release" --author="ReleaseBot <releasebot@agero.com>"
           git push origin ${PRE_RELEASE_BRANCH}
       - name: Create pull request
         uses: actions/github-script@v6
