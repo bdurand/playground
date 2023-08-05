@@ -69,6 +69,11 @@ jobs:
               return;
             }
 
+            core.notice(`Creating hotfix branch from ${tag} (${sha}) (${context.sha})`)
+            if (sha != context.sha) {
+              core.notice(`Tag ${tag} does not point to the current commit`);
+              return;
+            }
             await github.request('POST /repos/{owner}/{repo}/git/refs', {
               owner: context.repo.owner,
               repo: context.repo.repo,
