@@ -1,4 +1,4 @@
-name: "Release Candidate: Cancel"
+name: "* Release Candidate: Cancel"
 
 on:
   workflow_dispatch:
