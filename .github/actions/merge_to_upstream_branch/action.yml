@@ -2,7 +2,7 @@ name: Merge a branch to an upstream branch
 description: Gets the name of the current pre-release branch.
 
 inputs:
-  branch:
+  source-branch:
     description: The name of the branch to merge.
     required: true
   upstream-branch:
@@ -17,7 +17,7 @@ runs:
       uses: actions/github-script@v6
       with:
         script: |
-          const branch = core.getInput('branch');
+          const branch = core.getInput('source-branch');
           const upstreamBranch = core.getInput('upstream-branch');
           try {
             await github.request('POST /repos/{owner}/{repo}/merges', {
@@ -44,7 +44,7 @@ runs:
       uses: actions/github-script@v6
       with:
         script: |
-          const branch = core.getInput('branch');
+          const branch = core.getInput('source-branch');
           const upstreamBranch = core.getInput('upstream-branch');
 
           const { data: existingPullRequests } = await github.request('GET /repos/{owner}/{repo}/pulls', {
