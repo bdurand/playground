@@ -19,19 +19,15 @@ jobs:
           sparse-checkout: .github
       - name: Generate a token for the action app
         id: generate_token
-        uses: tibdex/github-app-token@v1.8.0
+        uses: tibdex/github-app-token@c2055a00597a80f713b78b1650e8d3418f4d9a65
         with:
           app_id: ${{ secrets.ACTION_APP_ID }}
           private_key: ${{ secrets.ACTION_APP_PRIVATE_KEY }}
-      - name: Use the token
-        env:
-          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
-        run: |
-          gh api octocat
       - name: Merge pre-release to main
         id: merge_to_main
         uses: ./.github/actions/merge_to_upstream_branch
         with:
-          upstream-branch: main
+          upstream-branch: main2
           source-branch: pre-release
           pull-request-label: Failed Merge
+          github-token: ${{ secrets.ADMIN_GITHUB_TOKEN }}
