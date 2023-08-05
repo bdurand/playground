@@ -1,0 +1,51 @@
+name: "Hotfix: Complete"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Complete hotfix
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: hotfix
+    steps:
+      - name: Delete hotfix branch
+        uses: actions/github-script@v6
+        with:
+          script: |
+            try {
+              await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                branch: 'hotfix'
+              });
+            } catch (error) {
+              core.setFailed('Not currently in hotfix; hotfix branch does not exist');
+            }
+
+            await github.request('DELETE /repos/{owner}/{repo}/git/refs/heads/{branch}', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              branch: 'hotfix'
+            });
+            core.info('Deleted hotfix branch');
+      - name: Create hotfix release
+        uses: actions/github-script@v6
+        with:
+          script: |
+            /*
+            const { data: release } = await github.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: 'hotfix',
+              name: 'Hotfix',
+              body: 'Hotfix',
+              draft: false,
+              prerelease: false
+            });
+            core.info(`Created release ${release.id}`);
+            */
+

@@ -18,22 +18,20 @@ jobs:
         with:
           script: |
             async function getBranch(branchName) {
-              try {
-                const { data } = await github.repos.getBranch({
+            }
+
+            let buildBranch = ['hotfix', 'pre-release'].find(branchName => {
+                await github.repos.getBranch({
                   owner: owner,
                   repo: repo,
                   branch: branchName,
                 });
-                return data;
+                return true;
               } catch (error) {
-                return null;
+                return false;
               }
-            }
-
-            ['hotfix', 'pre-release'].find(branchName => {
-              branchInfo = await getBranch(branchName);
-              return branchInfo;
             });
+
             if (!buildBranch) {
               buildBranch = 'main';
             }

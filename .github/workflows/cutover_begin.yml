@@ -1,11 +1,11 @@
-name: "Cutover: Start"
+name: "Cutover: Begin"
 
 on:
   workflow_dispatch:
 
 jobs:
   build:
-    name: Start cutover
+    name: Begin cutover
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -17,7 +17,7 @@ jobs:
         with:
           script: |
             try {
-              const branchInfo = await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
+              await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 branch: 'pre-release',

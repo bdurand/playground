@@ -1,4 +1,4 @@
-name: "Cutover: Start"
+name: "Hotfix: Begin"
 
 on:
   workflow_dispatch:
@@ -21,7 +21,7 @@ jobs:
         with:
           script: |
             try {
-              const branchInfo = await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
+              await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 branch: 'hotfix',
@@ -32,24 +32,24 @@ jobs:
               const tag = context.inputs.tag;
               if (tag) {
                 try {
-                  const tagInfo = await github.request('GET /repos/{owner}/{repo}/git/ref/tags/{tag}', {
+                  const { data: tagInfo } = await github.request('GET /repos/{owner}/{repo}/git/ref/tags/{tag}', {
                     owner: context.repo.owner,
                     repo: context.repo.repo,
                     tag: tag,
                   });
-                  console.log(tagInfo.data);
-                  sha = tagInfo.data.object.sha;
+                  console.log(tagInfo);
+                  sha = tagInfo.object.sha;
                 } catch (tagError) {
                   core.setFailed(`Tag ${tag} not found`);
                 }
               } else {
                 try {
-                  const releaseInfo = await github.request('GET /repos/{owner}/{repo}/releases/latest', {
+                  const { data: releaseInfo } = await github.request('GET /repos/{owner}/{repo}/releases/latest', {
                     owner: context.repo.owner,
                     repo: context.repo.repo,
                   });
-                  console.log(releaseInfo.data)
-                  sha = releaseInfo.data.target_commitish;
+                  console.log(releaseInfo)
+                  sha = releaseInfo.target_commitish;
                 } catch (releaseError) {
                   core.setFailed('No release found');
                 }
