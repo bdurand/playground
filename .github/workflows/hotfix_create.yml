@@ -69,10 +69,11 @@ jobs:
               return;
             }
 
+            core.notice(`Creating hotfix branch from ${tag} (${sha})`)
             await github.request('POST /repos/{owner}/{repo}/git/refs', {
               owner: context.repo.owner,
               repo: context.repo.repo,
               ref: 'refs/heads/hotfix',
-              sha: sha
+              sha: context.sha
             });
             core.notice('Created hotfix branch');
