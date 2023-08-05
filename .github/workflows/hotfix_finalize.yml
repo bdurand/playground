@@ -1,4 +1,5 @@
 name: "* Hotfix: Finalize"
+run-name: "Finalize Hotfix"
 
 on:
   workflow_dispatch:

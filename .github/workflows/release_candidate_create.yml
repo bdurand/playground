@@ -1,4 +1,5 @@
 name: "* Release Candidate: Create"
+run-name: "Create Release Candidate"
 
 on:
   workflow_dispatch:

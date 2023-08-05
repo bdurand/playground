@@ -1,4 +1,5 @@
 name: "* Release Candidate: Finalize"
+run-name: "Finalize Release Candidate"
 
 on:
   workflow_dispatch:
