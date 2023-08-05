@@ -35,16 +35,3 @@ jobs:
           upstream-branch: main
           source-branch: pre-release
           pull-request-label: Failed Merge
-      # - name: Merge pre-release to main
-      #   id: commit_count
-      #   uses: actions/github-script@v6
-      #   with:
-      #     script: |
-      #       await github.request('POST /repos/{owner}/{repo}/merges', {
-      #         owner: context.repo.owner,
-      #         repo: context.repo.repo,
-      #         base: 'main',
-      #         head: 'pre-release',
-      #         commit_message: 'Merged pre-release to main.'
-      #       });
-      #       core.notice('Merged pre-release to main');

@@ -61,6 +61,7 @@ runs:
           if (process.env.LABEL) {
             labels.push(process.env.LABEL);
           }
+          console.log(labels);
 
           const { data: existingPullRequests } = await github.request('GET /repos/{owner}/{repo}/pulls', {
             owner: context.repo.owner,
