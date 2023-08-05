@@ -8,6 +8,9 @@ inputs:
   upstream-branch:
     description: The name of the upstream branch to merge into.
     required: true
+  labels:
+    description: The labels to add to the pull request.
+    required: false
 
 runs:
   using: "composite"
@@ -15,25 +18,28 @@ runs:
     - name: Merge banch
       id: merge_branch
       uses: actions/github-script@v6
+      env:
+        SOURCE_BRANCH: ${{ inputs.source-branch }}
+        UPSTREAM_BRANCH: ${{ inputs.upstream-branch }}
       with:
         script: |
-          const branch = core.getInput('source-branch');
-          const upstreamBranch = core.getInput('upstream-branch');
+          const sourceBranch = process.env.SOURCE_BRANCH;
+          const upstreamBranch = process.env.UPSTREAM_BRANCH;
           try {
             await github.request('POST /repos/{owner}/{repo}/merges', {
               owner: context.repo.owner,
               repo: context.repo.repo,
-              base: 'main',
-              head: 'pre-release',
+              base: upstreamBranch,
+              head: sourceBranch,
               commit_message: 'Merged pre-release to main.'
             });
-            core.notice('Merged pre-release to main');
+            core.notice(`Merged ${sourceBranch} to ${upstreamBranch}`);
             return 'success'
-          } catch(error) {
+          } catch (error) {
             if (error.status === 409) {
-              core.warning(`Conflict merging ${branch} to ${upstreamBranch}`);
+              core.warning(`Conflict merging ${sourceBranch} to ${upstreamBranch}`);
             } if (error.status === 404) {
-              core.setFailed(`Branch ${branch} or ${upstreamBranch} not found`);
+              core.setFailed(`Branch ${sourceBranch} or ${upstreamBranch} not found`);
               return;
             } else {
               throw error;
@@ -42,32 +48,40 @@ runs:
     - name: Open pull request
       if: steps.merge_branch.outputs.result != 'success'
       uses: actions/github-script@v6
+      env:
+        SOURCE_BRANCH: ${{ inputs.source-branch }}
+        UPSTREAM_BRANCH: ${{ inputs.upstream-branch }}
+        LABEL: ${{ inputs.labels }}
       with:
         script: |
-          const branch = core.getInput('source-branch');
-          const upstreamBranch = core.getInput('upstream-branch');
+          const sourceBranch = process.env.SOURCE_BRANCH;
+          const upstreamBranch = process.env.UPSTREAM_BRANCH;
+          let labels = [];
+          if (process.env.LABEL) {
+            labels.push(process.env.LABEL);
+          }
 
           const { data: existingPullRequests } = await github.request('GET /repos/{owner}/{repo}/pulls', {
             owner: context.repo.owner,
             repo: context.repo.repo,
             state: 'open',
             base: upstreamBranch,
-            head: context.repo.owner + ':' + branch
+            head: `${context.repo.owner}:${sourceBranch}`
           });
 
           if (existingPullRequests.length > 0) {
-            core.notice(`Pull request already exists for ${branch} to ${upstreamBranch}: ${existingPullRequests[0].html_url}`);
+            core.notice(`Pull request already exists for ${sourceBranch} to ${upstreamBranch}: ${existingPullRequests[0].html_url}`);
             return;
           }
 
           const { dataa: pullRequest } = await github.request('POST /repos/{owner}/{repo}/pulls', {
             owner: context.repo.owner,
             repo: context.repo.repo,
-            title: `[BACKPORT] Failed auto merge from ${branch}`,
-            head: branch,
+            title: `[BACKPORT] Failed auto merge from ${sourceBranch}`,
+            head: sourceBranch,
             base: upstreamBranch,
-            labels: core.getInput('labels'),
-            body: `This pull request captures a failed merge from ${branch}. Please reconcile any merge conflicts and merge if appropriate.`
+            labels: labels,
+            body: `This pull request captures a failed merge from ${sourceBranch}. Please reconcile any merge conflicts and merge if appropriate.`
           });
           pullRequest = createResponse.data;
           core.warning('Created pull request to handle the failed merge: ' + pullRequest.html_url);
