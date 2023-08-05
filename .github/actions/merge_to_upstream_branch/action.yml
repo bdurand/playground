@@ -5,7 +5,7 @@ inputs:
   branch:
     description: The name of the branch to merge.
     required: true
-  upstream_branch:
+  upstream-branch:
     description: The name of the upstream branch to merge into.
     required: true
 
@@ -18,7 +18,7 @@ runs:
       with:
         script: |
           const branch = core.getInput('branch');
-          const upstreamBranch = core.getInput('upstream_branch');
+          const upstreamBranch = core.getInput('upstream-branch');
           try {
             await github.request('POST /repos/{owner}/{repo}/merges', {
               owner: context.repo.owner,
@@ -45,7 +45,7 @@ runs:
       with:
         script: |
           const branch = core.getInput('branch');
-          const upstreamBranch = core.getInput('upstream_branch');
+          const upstreamBranch = core.getInput('upstream-branch');
 
           const { data: existingPullRequests } = await github.request('GET /repos/{owner}/{repo}/pulls', {
             owner: context.repo.owner,
