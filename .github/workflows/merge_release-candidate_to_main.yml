@@ -24,10 +24,9 @@ jobs:
           app_id: ${{ secrets.ACTION_APP_ID }}
           private_key: ${{ secrets.ACTION_APP_PRIVATE_KEY }}
       - name: Merge release-candidate to main
-        id: merge_to_main
         uses: ./.github/actions/merge_to_upstream_branch
         with:
-          upstream-branch: main2
-          source-branch: release-candidate
+          target-branch: main
+          source-branch: ${{ github.event.ref }}
           pull-request-label: Failed Merge
           github-token: ${{ secrets.ADMIN_GITHUB_TOKEN }}

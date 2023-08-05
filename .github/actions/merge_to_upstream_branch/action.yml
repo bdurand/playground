@@ -1,12 +1,12 @@
-name: Merge a branch to an upstream branch
+name: Merge a branch into another branch
 description: Gets the name of the current release-candidate branch.
 
 inputs:
   source-branch:
     description: The name of the branch to merge.
     required: true
-  upstream-branch:
-    description: The name of the upstream branch to merge into.
+  target-branch:
+    description: The name of the target branch to merge into.
     required: true
   pull-request-label:
     description: The label to add to the pull request if auto merge fails.
@@ -23,7 +23,7 @@ runs:
       uses: actions/github-script@v6
       env:
         SOURCE_BRANCH: ${{ inputs.source-branch }}
-        UPSTREAM_BRANCH: ${{ inputs.upstream-branch }}
+        TARGET_BRANCH: ${{ inputs.target-branch }}
       with:
         github-token: ${{ inputs.github-token }}
         script: |
@@ -31,23 +31,24 @@ runs:
             process.env.GITHUB_TOKEN = process.env.CUSTOM_GITHUB_TOKEN;
           }
           const sourceBranch = process.env.SOURCE_BRANCH;
-          const upstreamBranch = process.env.UPSTREAM_BRANCH;
+          const targetBranch = process.env.TARGET_BRANCH;
+
           try {
             await github.request('POST /repos/{owner}/{repo}/merges', {
               owner: context.repo.owner,
               repo: context.repo.repo,
-              base: upstreamBranch,
+              base: targetBranch,
               head: sourceBranch,
-              commit_message: 'Merged release-candidate to main.'
+              commit_message: `Auto-merge from ${sourceBranch} branch`
             });
-            core.notice(`Merged ${sourceBranch} to ${upstreamBranch}`);
+            core.notice(`Merged ${sourceBranch} to ${targetBranch}`);
             core.setOutput('merged', 'success');
           } catch (error) {
             if (error.status === 409) {
-              core.warning(`Cannot merge ${sourceBranch} to ${upstreamBranch}`);
+              core.warning(`Cannot merge ${sourceBranch} to ${targetBranch}`);
               return;
             } if (error.status === 404) {
-              core.setFailed(`Branch ${sourceBranch} or ${upstreamBranch} not found`);
+              core.setFailed(`Branch ${sourceBranch} or ${targetBranch} not found`);
               return;
             } else {
               throw error;
@@ -58,23 +59,23 @@ runs:
       uses: actions/github-script@v6
       env:
         SOURCE_BRANCH: ${{ inputs.source-branch }}
-        UPSTREAM_BRANCH: ${{ inputs.upstream-branch }}
+        TARGET_BRANCH: ${{ inputs.target-branch }}
         LABEL: ${{ inputs.pull-request-label }}
       with:
         script: |
           const sourceBranch = process.env.SOURCE_BRANCH;
-          const upstreamBranch = process.env.UPSTREAM_BRANCH;
+          const targetBranch = process.env.TARGET_BRANCH;
 
           const { data: existingPullRequests } = await github.request('GET /repos/{owner}/{repo}/pulls', {
             owner: context.repo.owner,
             repo: context.repo.repo,
             state: 'open',
-            base: upstreamBranch,
+            base: targetBranch,
             head: `${context.repo.owner}:${sourceBranch}`
           });
 
           if (existingPullRequests.length > 0) {
-            core.notice(`Pull request already exists for ${sourceBranch} to ${upstreamBranch}: ${existingPullRequests[0].html_url}`);
+            core.notice(`Pull request already exists for ${sourceBranch} to ${targetBranch}: ${existingPullRequests[0].html_url}`);
             return;
           }
 
@@ -83,7 +84,7 @@ runs:
             repo: context.repo.repo,
             title: `[BACKPORT] Failed auto merge from ${sourceBranch}`,
             head: sourceBranch,
-            base: upstreamBranch,
+            base: targetBranch,
             body: `This pull request captures a failed merge from ${sourceBranch}. Please reconcile any merge conflicts and merge if appropriate.`
           });
           core.warning('Created pull request to handle the failed merge: ' + pullRequest.html_url);
