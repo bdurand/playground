@@ -17,22 +17,17 @@ jobs:
         uses: actions/checkout@v3
         with:
           sparse-checkout: .github
-      - name: Get existing pull request
-        id: check_pull_request
+      - name: Generate a token for the action app
+        id: generate_token
+        uses: tibdex/github-app-token@v1.8.0
+        with:
+          app_id: ${{ secrets.ACTION_APP_ID }}
+          private_key: ${{ secrets.ACTION_APP_PRIVATE_KEY }}
+      - name: Merge pre-release to main
+        id: merge_to_main
         uses: ./.github/actions/merge_to_upstream_branch
         with:
-          upstream-branch: main
+          upstream-branch: main2
           source-branch: pre-release
-      # - name: Merge pre-release to main
-      #   id: commit_count
-      #   uses: actions/github-script@v6
-      #   with:
-      #     script: |
-      #       await github.request('POST /repos/{owner}/{repo}/merges', {
-      #         owner: context.repo.owner,
-      #         repo: context.repo.repo,
-      #         base: 'main',
-      #         head: 'pre-release',
-      #         commit_message: 'Merged pre-release to main.'
-      #       });
-      #       core.notice('Merged pre-release to main');
+          pull-request-label: Failed Merge
+          github-token: ${{ secrets.ADMIN_GITHUB_TOKEN }}

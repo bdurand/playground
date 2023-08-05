@@ -8,9 +8,12 @@ inputs:
   upstream-branch:
     description: The name of the upstream branch to merge into.
     required: true
-  labels:
-    description: The labels to add to the pull request.
+  pull-request-label:
+    description: The label to add to the pull request if auto merge fails.
     required: false
+  github-token:
+    description: The GitHub token to use for the merge.
+    required: true
 
 runs:
   using: "composite"
@@ -22,7 +25,11 @@ runs:
         SOURCE_BRANCH: ${{ inputs.source-branch }}
         UPSTREAM_BRANCH: ${{ inputs.upstream-branch }}
       with:
+        github-token: ${{ inputs.github-token }}
         script: |
+          if (process.env.CUSTOM_GITHUB_TOKEN) {
+            process.env.GITHUB_TOKEN = process.env.CUSTOM_GITHUB_TOKEN;
+          }
           const sourceBranch = process.env.SOURCE_BRANCH;
           const upstreamBranch = process.env.UPSTREAM_BRANCH;
           try {
@@ -34,33 +41,29 @@ runs:
               commit_message: 'Merged pre-release to main.'
             });
             core.notice(`Merged ${sourceBranch} to ${upstreamBranch}`);
-            return 'success'
+            core.setOutput('merged', 'success');
           } catch (error) {
             if (error.status === 409) {
-              core.warning(`Conflict merging ${sourceBranch} to ${upstreamBranch}`);
+              core.warning(`Cannot merge ${sourceBranch} to ${upstreamBranch}`);
+              return;
             } if (error.status === 404) {
               core.setFailed(`Branch ${sourceBranch} or ${upstreamBranch} not found`);
               return;
             } else {
               throw error;
             }
-            return 'failed';
           }
     - name: Open pull request
-      if: steps.merge_branch.outputs.result != 'success'
+      if: steps.merge_branch.outputs.merged != 'success'
       uses: actions/github-script@v6
       env:
         SOURCE_BRANCH: ${{ inputs.source-branch }}
         UPSTREAM_BRANCH: ${{ inputs.upstream-branch }}
-        LABEL: ${{ inputs.labels }}
+        LABEL: ${{ inputs.pull-request-label }}
       with:
         script: |
           const sourceBranch = process.env.SOURCE_BRANCH;
           const upstreamBranch = process.env.UPSTREAM_BRANCH;
-          let labels = [];
-          if (process.env.LABEL) {
-            labels.push(process.env.LABEL);
-          }
 
           const { data: existingPullRequests } = await github.request('GET /repos/{owner}/{repo}/pulls', {
             owner: context.repo.owner,
@@ -75,14 +78,21 @@ runs:
             return;
           }
 
-          const { dataa: pullRequest } = await github.request('POST /repos/{owner}/{repo}/pulls', {
+          const { data: pullRequest } = await github.request('POST /repos/{owner}/{repo}/pulls', {
             owner: context.repo.owner,
             repo: context.repo.repo,
             title: `[BACKPORT] Failed auto merge from ${sourceBranch}`,
             head: sourceBranch,
             base: upstreamBranch,
-            labels: labels,
             body: `This pull request captures a failed merge from ${sourceBranch}. Please reconcile any merge conflicts and merge if appropriate.`
           });
-          pullRequest = createResponse.data;
           core.warning('Created pull request to handle the failed merge: ' + pullRequest.html_url);
+
+          if (process.env.LABEL) {
+            await github.request('POST /repos/{owner}/{repo}/issues/{issue_number}/labels', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pullRequest.number,
+              labels: [process.env.LABEL]
+            });
+          }
