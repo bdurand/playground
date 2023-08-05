@@ -35,15 +35,16 @@ jobs:
             }
 
             const refToBuild = `refs/heads/${buildBranch}`;
-            core.setOutput('ref', refToBuild);
             if (context.ref !== refToBuild) {
               core.warning(`Not deploying to staging; current build branch is ${buildBranch}`);
             }
+            console.log(context)
+            return refToBuild;
       - name: Build Docker image
-        if: github.event.ref == steps.ref_to_build.outputs.ref
+        if: github.event.ref == steps.ref_to_build.outputs.result
         run: |
           echo "Build Docker image"
       - name: Run deployment
-        if: github.event.ref == steps.ref_to_build.outputs.ref
+        if: github.event.ref == steps.ref_to_build.outputs.result
         run: |
           echo "Deploying ${GITHUB_REF} to staging (${GITHUB_SHA})"
