@@ -16,6 +16,7 @@ jobs:
         id: ref_to_build
         uses: actions/github-script@v6
         with:
+          result-encoding: string
           script: |
             let buildBranch = 'main';
             const branches = ['hotfix', 'pre-release'];

@@ -6,6 +6,7 @@ on:
       tag:
         description: Tag to start hotfix from. Defaults to the current release.
         required: false
+        default: ''
 
 jobs:
   build:
@@ -29,30 +30,31 @@ jobs:
               core.setFailed('Hotfix already in progress');
             } catch (error) {
               let sha = null;
-              const tag = core.getInput('tag');
-              if (tag) {
-                try {
-                  const { data: tagInfo } = await github.request('GET /repos/{owner}/{repo}/git/ref/tags/{tag}', {
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    tag: tag,
-                  });
-                  console.log(tagInfo);
-                  sha = tagInfo.object.sha;
-                } catch (tagError) {
-                  core.setFailed(`Tag ${tag} not found`);
-                }
-              } else {
+              let tag = context.inputs.tag;
+
+              if (!tag) {
                 try {
                   const { data: releaseInfo } = await github.request('GET /repos/{owner}/{repo}/releases/latest', {
                     owner: context.repo.owner,
                     repo: context.repo.repo,
                   });
                   console.log(releaseInfo)
-                  sha = releaseInfo.target_commitish;
+                  tag = releaseInfo.tag_name;
                 } catch (releaseError) {
                   core.setFailed('No release found');
                 }
+              }
+
+              try {
+                const { data: tagInfo } = await github.request('GET /repos/{owner}/{repo}/git/ref/tags/{tag}', {
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  tag: tag,
+                });
+                console.log(tagInfo);
+                sha = tagInfo.object.sha;
+              } catch (tagError) {
+                core.setFailed(`Tag ${tag} not found`);
               }
 
               await github.request('POST /repos/{owner}/{repo}/git/refs', {
@@ -61,5 +63,5 @@ jobs:
                 ref: 'refs/heads/hotfix',
                 sha: sha
               });
-              core.info('Created hotfix branch');
+              core.notice('Created hotfix branch');
             }

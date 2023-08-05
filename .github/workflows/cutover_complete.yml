@@ -31,4 +31,4 @@ jobs:
               repo: context.repo.repo,
               branch: 'pre-release'
             });
-            core.info('Deleted pre-release branch');
+            core.notice('Deleted pre-release branch');

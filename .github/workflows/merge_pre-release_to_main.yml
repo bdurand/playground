@@ -25,4 +25,4 @@ jobs:
               head: 'pre-release',
               commit_message: 'Merged pre-release to main.'
             });
-            core.info('Merged pre-release to main');
+            core.notice('Merged pre-release to main');
