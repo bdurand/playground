@@ -41,7 +41,7 @@ jobs:
             if (context.ref === refToBuild) {
               core.notice(`Current staging branch ${buildBranch}`);
             } else {
-              core.warning(`Not deploying to staging; current staging branch is ${buildBranch}`);
+              core.notice(`Not deploying to staging; current staging branch is ${buildBranch}`);
             }
             return refToBuild;
       - name: Build Docker image
