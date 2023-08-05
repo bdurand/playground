@@ -25,15 +25,14 @@ jobs:
           private_key: ${{ secrets.ACTION_APP_PRIVATE_KEY }}
       - name: Use the token
         env:
-          # GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
-          GITHUB_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
         run: |
           gh api octocat
       - name: Merge pre-release to main
-        id: check_pull_request
+        id: merge_to_main
         uses: ./.github/actions/merge_to_upstream_branch
         with:
-          upstream-branch: main2
+          upstream-branch: main
           source-branch: pre-release
           pull-request-label: Failed Merge
       # - name: Merge pre-release to main
