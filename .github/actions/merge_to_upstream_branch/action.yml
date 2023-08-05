@@ -47,7 +47,7 @@ runs:
             return 'failed';
           }
     - name: Open pull request
-      if: steps.merge_branch.outputs.result != 'success'
+      if: steps.merge_branch.outputs.result != "success"
       uses: actions/github-script@v6
       env:
         SOURCE_BRANCH: ${{ inputs.source-branch }}
@@ -55,7 +55,6 @@ runs:
         LABEL: ${{ inputs.labels }}
       with:
         script: |
-          console.log('${{ steps.merge_branch.outputs.result }}')
           const sourceBranch = process.env.SOURCE_BRANCH;
           const upstreamBranch = process.env.UPSTREAM_BRANCH;
           let labels = [];
