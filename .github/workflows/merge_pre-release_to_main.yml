@@ -17,13 +17,23 @@ jobs:
         uses: actions/checkout@v3
         with:
           sparse-checkout: .github
-      - name: Get existing pull request
+      - name: Generate a token for the action app
+        id: generate_token
+        uses: tibdex/github-app-token@v1.8.0
+        with:
+          app_id: ${{ secrets.ACTIONS_APP_ID }}
+          private_key: ${{ secrets.ACTIONS_APP_PRIVATE_KEY }}
+      - name: Use the token
+        env:
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
+        run: |
+          gh api octocat
+      - name: Merge pre-release to main
         id: check_pull_request
         uses: ./.github/actions/merge_to_upstream_branch
         with:
           upstream-branch: main2
           source-branch: pre-release
-          github-token: ${{ secrets.ADMIN_GITHUB_TOKEN }}
           pull-request-label: Failed Merge
       # - name: Merge pre-release to main
       #   id: commit_count
