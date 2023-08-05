@@ -40,7 +40,7 @@ runs:
             }
           }
     - name: Open pull request
-      if: steps.merge_branch.outputs.result !== 'success'
+      if: steps.merge_branch.outputs.result != 'success'
       uses: actions/github-script@v6
       with:
         script: |
