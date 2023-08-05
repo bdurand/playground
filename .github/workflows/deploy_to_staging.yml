@@ -31,8 +31,9 @@ jobs:
                 buildBranch = branchName;
                 break;
               } catch (error) {
-                console.error(error);
-                continue;
+                if (error.status !== 404)
+                  throw error;
+                }
               }
             }
 
