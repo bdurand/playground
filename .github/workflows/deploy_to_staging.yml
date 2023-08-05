@@ -17,19 +17,6 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            async function getBranch(branchName) {
-              try {
-                const { data } = await github.repos.getBranch({
-                  owner: owner,
-                  repo: repo,
-                  branch: branchName,
-                });
-                return data;
-              } catch (error) {
-                return null;
-              }
-            }
-
             let buildBranch = 'main';
             const branches = ['hotfix', 'pre-release'];
             for (let i = 0; i < branches.length; i++) {
@@ -38,11 +25,12 @@ jobs:
                 await github.repos.getBranch({
                   owner: owner,
                   repo: repo,
-                  branch: branchName,
+                  branch: branchName
                 });
                 buildBranch = branchName;
                 break;
               } catch (error) {
+                continue;
               }
             });
             console.log(`buildBranch = ${buildBranch}`);
