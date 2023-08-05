@@ -1,4 +1,4 @@
-name: "Release Candidate: Create"
+name: "* Release Candidate: Create"
 
 on:
   workflow_dispatch:

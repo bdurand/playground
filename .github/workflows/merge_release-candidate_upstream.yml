@@ -1,4 +1,4 @@
-name: Merge release-candidate To main
+name: Merge release-candidate branch upstream
 
 on:
   push:

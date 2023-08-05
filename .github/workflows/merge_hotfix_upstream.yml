@@ -1,4 +1,4 @@
-name: Merge hotfix To main
+name: Merge hotfix branch upstream
 
 on:
   push:

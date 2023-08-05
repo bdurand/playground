@@ -1,4 +1,4 @@
-name: "Hotfix: Create"
+name: "* Hotfix: Create"
 run-name: "Create hotfix from ${{ github.event.inputs.tag || 'latest release' }}"
 
 on:
