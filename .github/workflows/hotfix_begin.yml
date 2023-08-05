@@ -6,7 +6,6 @@ on:
       tag:
         description: Tag to start hotfix from. Defaults to the current release.
         required: false
-        default: ''
 
 jobs:
   build:
@@ -31,6 +30,9 @@ jobs:
             } catch (error) {
               let sha = null;
               console.log(context);
+              console.log(context.inputs);
+              console.log(context.inputs.tag);
+              console.log("here")
               let tag = context.inputs.tag;
 
               if (!tag) {
