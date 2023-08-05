@@ -27,11 +27,11 @@ runs:
         CUTSTOM_GITHUB_TOKEN: ${{ inputs.github-token }}
       with:
         script: |
-          console.log(process.env.GITHUB_TOKEN[0, 4])
+          console.log(process.env.GITHUB_TOKEN.substr(0, 4))
           if (process.env.CUTSTOM_GITHUB_TOKEN) {
             process.env.GITHUB_TOKEN = process.env.CUTSTOM_GITHUB_TOKEN;
           }
-          console.log(process.env.GITHUB_TOKEN[0, 4])
+          console.log(process.env.GITHUB_TOKEN.substr(0, 4))
           const sourceBranch = process.env.SOURCE_BRANCH;
           const upstreamBranch = process.env.UPSTREAM_BRANCH;
           try {
