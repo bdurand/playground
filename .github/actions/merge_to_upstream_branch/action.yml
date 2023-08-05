@@ -55,7 +55,6 @@ runs:
         LABEL: ${{ inputs.labels }}
       with:
         script: |
-          console.log('${{ steps.merge_branch.outputs.result }}')
           const sourceBranch = process.env.SOURCE_BRANCH;
           const upstreamBranch = process.env.UPSTREAM_BRANCH;
           let labels = [];
