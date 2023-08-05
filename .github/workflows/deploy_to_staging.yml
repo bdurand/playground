@@ -24,8 +24,8 @@ jobs:
               branchName = branches[i];
               try {
                 await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
-                  owner: owner,
-                  repo: repo,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
                   branch: branchName
                 });
                 buildBranch = branchName;
