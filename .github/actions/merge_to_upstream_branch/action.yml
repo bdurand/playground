@@ -71,6 +71,7 @@ runs:
           });
 
           if (existingPullRequests.length > 0) {
+            console.log(existingPullRequests);
             core.notice(`Pull request already exists for ${sourceBranch} to ${upstreamBranch}: ${existingPullRequests[0].html_url}`);
             return;
           }
