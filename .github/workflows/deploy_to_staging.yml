@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - pre-release
+      - release-candidate
       - hotfix
 
 jobs:
@@ -19,7 +19,7 @@ jobs:
           result-encoding: string
           script: |
             let buildBranch = 'main';
-            const branches = ['hotfix', 'pre-release'];
+            const branches = ['hotfix', 'release-candidate'];
             for (let i = 0; i < branches.length; i++) {
               branchName = branches[i];
               try {

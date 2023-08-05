@@ -1,0 +1,60 @@
+name: Merge hotfix To main
+
+on:
+  push:
+    branches:
+      - hotfix
+
+jobs:
+  merge:
+    name: Merge branches
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Load local GitHub actions
+        uses: actions/checkout@v3
+        with:
+          sparse-checkout: .github
+      - name: Generate a token for the action app
+        id: generate_token
+        uses: tibdex/github-app-token@v1.8.0
+        with:
+          app_id: ${{ secrets.ACTION_APP_ID }}
+          private_key: ${{ secrets.ACTION_APP_PRIVATE_KEY }}
+      - name: Check for release-candidate branch
+        id: check_for_release_candidate
+        uses: actions/github-script@v6
+        with:
+          script: |
+            try {
+              await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                branch: 'release-candidate'
+              });
+              core.setOutput('exists', 'true');
+            } catch (error) {
+              if (error.status === 404) {
+                core.notice(`Upstream branch ${upstreamBranch} does not exist`);
+                return;
+              } else {
+                throw error;
+              }
+            }
+      - name: Merge hotfix to release-candidate
+        if: steps.check_for_release_candidate.outputs.exists == 'true'
+        uses: ./.github/actions/merge_to_upstream_branch
+        with:
+          target-branch: release-candidate
+          source-branch: ${{ github.event.ref }}
+          pull-request-label: Failed Merge
+          github-token: ${{ secrets.ADMIN_GITHUB_TOKEN }}
+      - name: Merge hotfix to main
+        uses: ./.github/actions/merge_to_upstream_branch
+        with:
+          target-branch: main
+          source-branch: ${{ github.event.ref }}
+          pull-request-label: Failed Merge
+          github-token: ${{ secrets.ADMIN_GITHUB_TOKEN }}

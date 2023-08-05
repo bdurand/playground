@@ -1,4 +1,4 @@
-name: Create Pre-Release
+name: Create release-candidate
 
 on:
   workflow_dispatch:
@@ -27,14 +27,14 @@ jobs:
       - name: Get existing pull request
         id: check_pull_request
         uses: ./.github/actions/pre_release_branch
-      - name: Abort if pre-release pull request exists
+      - name: Abort if release-candidate pull request exists
         if: steps.check_pull_request.outputs.branch
         env:
           PULL_REQUEST_URL: ${{ steps.check_pull_request.outputs.url }}
         uses: actions/github-script@v6
         with:
           script: |
-            core.setFailed('A pre-release pull request already exists: ' + process.env.PULL_REQUEST_URL);
+            core.setFailed('A release-candidate pull request already exists: ' + process.env.PULL_REQUEST_URL);
       - name: Create branch
         id: create_branch
         uses: actions/github-script@v6
@@ -43,7 +43,7 @@ jobs:
           script: |
             const release = (new Date()).toISOString().slice(0, 10) + '.rc' + process.env.RELEASE_CANDIDATE;
             core.exportVariable('RELEASE', release);
-            const branchName = 'pre-release-' + release;
+            const branchName = 'release-candidate-' + release;
             core.exportVariable('PRE_RELEASE_BRANCH', branchName);
             try {
               const branchInfo = await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
@@ -51,7 +51,7 @@ jobs:
                 repo: context.repo.repo,
                 branch: branchName
               });
-              core.warning('Pre-release branch '+ branchName + ' already exists');
+              core.warning('release-candidate branch '+ branchName + ' already exists');
             } catch(error) {
               await github.request('POST /repos/{owner}/{repo}/git/refs', {
                 owner: context.repo.owner,
@@ -59,7 +59,7 @@ jobs:
                 ref: 'refs/heads/' + branchName,
                 sha: context.sha
               });
-              core.notice('Created pre-release branch: ' + branchName);
+              core.notice('Created release-candidate branch: ' + branchName);
               core.setOutput('created', 'true');
             }
             return branchName;
@@ -96,11 +96,11 @@ jobs:
               const createResponse = await github.request('POST /repos/{owner}/{repo}/pulls', {
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                title: 'Pre-release ' + process.env.RELEASE,
+                title: 'release-candidate ' + process.env.RELEASE,
                 head: process.env.PRE_RELEASE_BRANCH,
                 base: 'main',
-                labels: ['Pre-release'],
-                body: 'This is a pre-release pull request. It will be merged when the release is ready.'
+                labels: ['release-candidate'],
+                body: 'This is a release-candidate pull request. It will be merged when the release is ready.'
               });
               pullRequest = createResponse.data;
               core.notice('Created pull request: ' + pullRequest.html_url);
@@ -110,5 +110,5 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: pullRequest.number,
-              labels: ['Pre-release']
+              labels: ['release-candidate']
             });
