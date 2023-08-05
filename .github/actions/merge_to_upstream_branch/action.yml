@@ -38,6 +38,8 @@ runs:
           } catch (error) {
             if (error.status === 409) {
               core.warning(`Cannot merge ${sourceBranch} to ${upstreamBranch}`);
+              console.log(error);
+              console.log("*********************")
             } if (error.status === 404) {
               core.setFailed(`Branch ${sourceBranch} or ${upstreamBranch} not found`);
               return;
@@ -45,6 +47,7 @@ runs:
               throw error;
             }
           }
+          console.log('&&&&&&&&&&&&&&&&&&&&&')
     - name: Open pull request
       if: steps.merge_branch.outputs.merged != 'success'
       uses: actions/github-script@v6
