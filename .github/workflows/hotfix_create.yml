@@ -1,10 +1,11 @@
 name: "* Hotfix: Create"
+run-name: "Create hotfix from ${{ github.event.inputs.tag || 'latest release' }}"
 
 on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Tag to start hotfix from. Defaults to the current release.
+        description: Tag to create hotfix from (defaults to the current release)
         required: false
 
 jobs:
