@@ -24,14 +24,12 @@ runs:
       env:
         SOURCE_BRANCH: ${{ inputs.source-branch }}
         UPSTREAM_BRANCH: ${{ inputs.upstream-branch }}
-        CUTSTOM_GITHUB_TOKEN: ${{ inputs.github-token }}
       with:
+        github-token: ${{ inputs.github-token || secrets.GITHUB_TOKEN }}
         script: |
-          console.log(process.env.GITHUB_TOKEN.substr(0, 4))
-          if (process.env.CUTSTOM_GITHUB_TOKEN) {
-            process.env.GITHUB_TOKEN = process.env.CUTSTOM_GITHUB_TOKEN;
+          if (process.env.CUSTOM_GITHUB_TOKEN) {
+            process.env.GITHUB_TOKEN = process.env.CUSTOM_GITHUB_TOKEN;
           }
-          console.log(process.env.GITHUB_TOKEN.substr(0, 4))
           const sourceBranch = process.env.SOURCE_BRANCH;
           const upstreamBranch = process.env.UPSTREAM_BRANCH;
           try {
