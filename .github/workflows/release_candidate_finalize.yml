@@ -1,18 +1,18 @@
-name: "Cutover: Begin"
+name: "Release Candidate: Finalize"
 
 on:
   workflow_dispatch:
 
 jobs:
-  build:
-    name: Begin cutover
+  finalize:
+    name: Finalize release candidate
     runs-on: ubuntu-latest
     permissions:
       contents: write
     concurrency:
-      group: cutover
+      group: release-candidate
     steps:
-      - name: Create pre-release branch
+      - name: Delete release-candidate branch
         uses: actions/github-script@v6
         with:
           script: |
@@ -20,20 +20,19 @@ jobs:
               await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                branch: 'pre-release',
+                branch: 'release-candidate'
               });
-              core.setFailed('Cutover already in progress');
-              return;
             } catch (error) {
               if (error.status !== 404) {
                 throw error;
               }
+              core.setFailed('No current release candidate');
+              return;
             }
 
-            await github.request('POST /repos/{owner}/{repo}/git/refs', {
+            await github.request('DELETE /repos/{owner}/{repo}/git/refs/heads/{branch}', {
               owner: context.repo.owner,
               repo: context.repo.repo,
-              ref: 'refs/heads/pre-release',
-              sha: context.sha
+              branch: 'release-candidate'
             });
-            core.notice('Created pre-release branch');
+            core.notice('Deleted release-candidate branch');

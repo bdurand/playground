@@ -1,11 +1,11 @@
-name: "Hotfix: Complete"
+name: "Hotfix: Finalize"
 
 on:
   workflow_dispatch:
 
 jobs:
   build:
-    name: Complete hotfix
+    name: Finalize hotfix
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -16,30 +16,22 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
+            let sha = null;
             try {
-              await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
+              const { data: branchInfo } = await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 branch: 'hotfix'
               });
+              sha = branchInfo.commit.sha;
             } catch (error) {
               if (error.status !== 404) {
                 throw error;
               }
-              core.setFailed('Not currently in hotfix; hotfix branch does not exist');
+              core.setFailed('No hotfix branch exists');
               return;
             }
 
-            await github.request('DELETE /repos/{owner}/{repo}/git/refs/heads/{branch}', {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              branch: 'hotfix'
-            });
-            core.notice('Deleted hotfix branch');
-      - name: Create hotfix release
-        uses: actions/github-script@v6
-        with:
-          script: |
             /*
             const { data: release } = await github.repos.createRelease({
               owner: context.repo.owner,
@@ -53,3 +45,9 @@ jobs:
             core.notice(`Created release ${release.id}`);
             */
 
+            await github.request('DELETE /repos/{owner}/{repo}/git/refs/heads/{branch}', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              branch: 'hotfix'
+            });
+            core.notice('Deleted hotfix branch');

@@ -1,5 +1,5 @@
 name: Merge a branch to an upstream branch
-description: Gets the name of the current pre-release branch.
+description: Gets the name of the current release-candidate branch.
 
 inputs:
   source-branch:
@@ -38,7 +38,7 @@ runs:
               repo: context.repo.repo,
               base: upstreamBranch,
               head: sourceBranch,
-              commit_message: 'Merged pre-release to main.'
+              commit_message: 'Merged release-candidate to main.'
             });
             core.notice(`Merged ${sourceBranch} to ${upstreamBranch}`);
             core.setOutput('merged', 'success');

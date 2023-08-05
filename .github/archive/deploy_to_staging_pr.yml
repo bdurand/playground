@@ -4,7 +4,7 @@ on:
   push:
     branches:
       # - main
-      - pre-release-*
+      - release-candidate-*
       - hotfix-*
 
 jobs:
@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           sparse-checkout: .github
-      - name: Pre-release branch
+      - name: release-candidate branch
         id: pre_release_branch
         uses: ./.github/actions/pre_release_branch
       - name: Check if branch should be deployed to staging

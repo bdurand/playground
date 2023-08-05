@@ -1,15 +1,15 @@
-name: Get pre-release Branch
-description: Gets the name of the current pre-release branch.
+name: Get release-candidate Branch
+description: Gets the name of the current release-candidate branch.
 
 outputs:
   branch:
-    description: The name of the current pre-release branch.
+    description: The name of the current release-candidate branch.
     value: ${{ steps.pre_release_pull_request.outputs.branch }}
   sha:
-    description: The SHA of the current pre-release branch.
+    description: The SHA of the current release-candidate branch.
     value: ${{ steps.pre_release_pull_request.outputs.sha }}
   url:
-    description: The URL of the current pre-release pull request.
+    description: The URL of the current release-candidate pull request.
     value: ${{ steps.pre_release_pull_request.outputs.url }}
 
 runs:
@@ -24,11 +24,11 @@ runs:
             owner: context.repo.owner,
             repo: context.repo.repo,
             state: 'open',
-            labels: 'Pre-release'
+            labels: 'release-candidate'
           });
 
           const preReleaseIssue = issues.data.find(issue => {
-            return issue.title.startsWith('Pre-release');
+            return issue.title.startsWith('release-candidate');
           });
 
           if (!preReleaseIssue) {
@@ -46,6 +46,6 @@ runs:
             core.setOutput('sha', pullRequest.data.head.sha);
             core.setOutput('url', pullRequest.data.html_url);
           } catch(error) {
-            core.setFailed('Found non-pull request issue with the Pre-release label. ' + preReleaseIssue.html_url);
+            core.setFailed('Found non-pull request issue with the release-candidate label. ' + preReleaseIssue.html_url);
           }
 
