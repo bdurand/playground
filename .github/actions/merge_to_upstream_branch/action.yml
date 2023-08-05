@@ -84,5 +84,4 @@ runs:
             labels: labels,
             body: `This pull request captures a failed merge from ${sourceBranch}. Please reconcile any merge conflicts and merge if appropriate.`
           });
-          pullRequest = createResponse.data;
           core.warning('Created pull request to handle the failed merge: ' + pullRequest.html_url);
