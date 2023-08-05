@@ -34,7 +34,7 @@ runs:
               commit_message: 'Merged pre-release to main.'
             });
             core.notice(`Merged ${sourceBranch} to ${upstreamBranch}`);
-            return 'success'
+            core.setOutput('merged', 'success');
           } catch (error) {
             if (error.status === 409) {
               core.warning(`Cannot merge ${sourceBranch} to ${upstreamBranch}`);
@@ -44,10 +44,9 @@ runs:
             } else {
               throw error;
             }
-            return 'failed';
           }
     - name: Open pull request
-      if: steps.merge_branch.outputs.result != 'success'
+      if: steps.merge_branch.outputs.merged != 'success'
       uses: actions/github-script@v6
       env:
         SOURCE_BRANCH: ${{ inputs.source-branch }}
