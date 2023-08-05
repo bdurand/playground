@@ -32,7 +32,7 @@ jobs:
               } catch (error) {
                 continue;
               }
-            });
+            }
             console.log(`buildBranch = ${buildBranch}`);
 
             const refToBuild = `refs/heads/${buildBranch}`;
