@@ -74,6 +74,6 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               ref: 'refs/heads/hotfix',
-              sha: context.sha
+              sha: sha
             });
-            core.notice('Created hotfix branch');
+            core.notice(`Created hotfix branch from tag ${tag}`);
