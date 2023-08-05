@@ -38,13 +38,7 @@ jobs:
             if (context.ref !== refToBuild) {
               core.warning(`Not deploying to staging; current build branch is ${buildBranch}`);
             }
-            console.log(context)
-            console.log(refToBuild)
             return refToBuild;
-      - name: debug
-        run: |
-          echo "debug"
-          echo ${{ steps.ref_to_build.outputs.result }}
       - name: Build Docker image
         if: github.event.ref == steps.ref_to_build.outputs.result
         run: |
