@@ -17,7 +17,6 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            console.log(context)
             try {
               await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
                 owner: context.repo.owner,
