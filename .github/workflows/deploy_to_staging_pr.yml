@@ -30,7 +30,7 @@ jobs:
           script: |
             if (context.ref === 'refs/heads/main' && !process.env.PRE_RELEASE_BRANCH) {
               return 'true';
-            } else if (context.ref === 'refs/heads/' + process.env.PRE_RELEASE_BRANCH) {
+            } else if (context.ref === `refs/heads/${process.env.PRE_RELEASE_BRANCH}`) {
               return 'true';
             } else {
               return null;

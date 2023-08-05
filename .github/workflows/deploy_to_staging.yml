@@ -30,17 +30,18 @@ jobs:
               }
             }
 
-            const hotfixBranch = await getBranch('hotfix');
-            if (hotfixBranch) {
-              return 'refs/heads/hotfix';
+            let buildBranch = ['hotfix', 'pre-release'].find(async (branchName) => {
+              return await getBranch(branchName);
+            });
+            if (!buildBranch) {
+              buildBranch = 'main';
             }
 
-            const preReleaseBranch = await getBranch('pre-release');
-            if (preReleaseBranch) {
-              return 'refs/heads/pre-release';
+            const refToBuild = `refs/heads/${buildBranch}`;
+            if (context.ref !== refToBuild) {
+              core.warning(`Not deploying to staging; current build branch is ${buildBranch}`);
             }
-
-            return 'refs/heads/main';
+            return refToBuild;
       - name: Build Docker image
         if: github.event.ref == steps.ref_to_build.outputs.result
         run: |
