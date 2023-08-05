@@ -1,0 +1,65 @@
+name: "Cutover: Start"
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag to start hotfix from. Defaults to the current release.
+        required: false
+
+jobs:
+  build:
+    name: Start hotfix
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: hotfix
+    steps:
+      - name: Create hotfix branch
+        uses: actions/github-script@v6
+        with:
+          script: |
+            try {
+              const branchInfo = await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                branch: 'hotfix',
+              });
+              core.setFailed('Hotfix already in progress');
+            } catch (error) {
+              let sha = null;
+              const tag = context.inputs.tag;
+              if (tag) {
+                try {
+                  const tagInfo = await github.request('GET /repos/{owner}/{repo}/git/ref/tags/{tag}', {
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    tag: tag,
+                  });
+                  console.log(tagInfo.data);
+                  sha = tagInfo.data.object.sha;
+                } catch (tagError) {
+                  core.setFailed(`Tag ${tag} not found`);
+                }
+              } else {
+                try {
+                  const releaseInfo = await github.request('GET /repos/{owner}/{repo}/releases/latest', {
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                  });
+                  console.log(releaseInfo.data)
+                  sha = releaseInfo.data.target_commitish;
+                } catch (releaseError) {
+                  core.setFailed('No release found');
+                }
+              }
+
+              await github.request('POST /repos/{owner}/{repo}/git/refs', {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: 'refs/heads/hotfix',
+                sha: sha
+              });
+              core.info('Created hotfix branch');
+            }

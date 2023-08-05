@@ -22,7 +22,7 @@ jobs:
                 repo: context.repo.repo,
                 branch: 'pre-release',
               });
-              core.setFailed('Already in cutover');
+              core.setFailed('Cutover already in progress');
             } catch (error) {
               await github.request('POST /repos/{owner}/{repo}/git/refs', {
                 owner: context.repo.owner,

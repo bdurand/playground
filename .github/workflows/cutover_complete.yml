@@ -1,4 +1,4 @@
-name: "Cutover: End"
+name: "Cutover: Complete"
 
 on:
   workflow_dispatch:
