@@ -25,7 +25,8 @@ jobs:
           private_key: ${{ secrets.ACTION_APP_PRIVATE_KEY }}
       - name: Use the token
         env:
-          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
+          # GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
+          GITHUB_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
         run: |
           gh api octocat
       - name: Merge pre-release to main
