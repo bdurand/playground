@@ -1,0 +1,73 @@
+name: Merge a branch to an upstream branch
+description: Gets the name of the current pre-release branch.
+
+inputs:
+  branch:
+    description: The name of the branch to merge.
+    required: true
+  upstream_branch:
+    description: The name of the upstream branch to merge into.
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Merge banch
+      id: merge_branch
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const branch = core.getInput('branch');
+          const upstreamBranch = core.getInput('upstream_branch');
+          try {
+            await github.request('POST /repos/{owner}/{repo}/merges', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              base: 'main',
+              head: 'pre-release',
+              commit_message: 'Merged pre-release to main.'
+            });
+            core.notice('Merged pre-release to main');
+            return 'success'
+          } catch(error) {
+            if (error.status === 409) {
+              core.warning(`Conflict merging ${branch} to ${upstreamBranch}`);
+            } if (error.status === 404) {
+              core.setFailed(`Branch ${branch} or ${upstreamBranch} not found`);
+              return;
+            } else {
+              throw error;
+            }
+          }
+    - name: Open pull request
+      if: steps.merge_branch.outputs.result !== 'success'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const branch = core.getInput('branch');
+          const upstreamBranch = core.getInput('upstream_branch');
+
+          const { data: existingPullRequests } = await github.request('GET /repos/{owner}/{repo}/pulls', {
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            state: 'open',
+            base: upstreamBranch,
+            head: context.repo.owner + ':' + branch
+          });
+
+          if (existingPullRequests.length > 0) {
+            core.notice(`Pull request already exists for ${branch} to ${upstreamBranch}: ${existingPullRequests[0].html_url}`);
+            return;
+          }
+
+          const { dataa: pullRequest } = await github.request('POST /repos/{owner}/{repo}/pulls', {
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: `[BACKPORT] Failed auto merge from ${branch}`,
+            head: branch,
+            base: upstreamBranch,
+            labels: core.getInput('labels'),
+            body: `This pull request captures a failed merge from ${branch}. Please reconcile any merge conflicts and merge if appropriate.`
+          });
+          pullRequest = createResponse.data;
+          core.warning('Created pull request to handle the failed merge: ' + pullRequest.html_url);

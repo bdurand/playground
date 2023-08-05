@@ -13,16 +13,26 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - name: Merge pre-release to main
-        id: commit_count
-        uses: actions/github-script@v6
+      - name: Load local GitHub actions
+        uses: actions/checkout@v3
         with:
-          script: |
-            await github.request('POST /repos/{owner}/{repo}/merges', {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              base: 'main',
-              head: 'pre-release',
-              commit_message: 'Merged pre-release to main.'
-            });
-            core.notice('Merged pre-release to main');
+          sparse-checkout: .github
+      - name: Get existing pull request
+        id: check_pull_request
+        uses: ./.github/actions/merge_to_upstream_branch
+        with:
+          upstream-branch: main
+          source-branch: pre-release
+      # - name: Merge pre-release to main
+      #   id: commit_count
+      #   uses: actions/github-script@v6
+      #   with:
+      #     script: |
+      #       await github.request('POST /repos/{owner}/{repo}/merges', {
+      #         owner: context.repo.owner,
+      #         repo: context.repo.repo,
+      #         base: 'main',
+      #         head: 'pre-release',
+      #         commit_message: 'Merged pre-release to main.'
+      #       });
+      #       core.notice('Merged pre-release to main');
