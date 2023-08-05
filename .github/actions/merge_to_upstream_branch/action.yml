@@ -8,8 +8,8 @@ inputs:
   upstream-branch:
     description: The name of the upstream branch to merge into.
     required: true
-  labels:
-    description: The labels to add to the pull request.
+  pull-request-label:
+    description: The label to add to the pull request if auto merge fails.
     required: false
 
 runs:
@@ -37,7 +37,7 @@ runs:
             return 'success'
           } catch (error) {
             if (error.status === 409) {
-              core.warning(`Conflict merging ${sourceBranch} to ${upstreamBranch}`);
+              core.warning(`Cannot merge ${sourceBranch} to ${upstreamBranch}`);
             } if (error.status === 404) {
               core.setFailed(`Branch ${sourceBranch} or ${upstreamBranch} not found`);
               return;
@@ -52,7 +52,7 @@ runs:
       env:
         SOURCE_BRANCH: ${{ inputs.source-branch }}
         UPSTREAM_BRANCH: ${{ inputs.upstream-branch }}
-        LABEL: ${{ inputs.labels }}
+        LABEL: ${{ inputs.pull-request-label }}
       with:
         script: |
           const sourceBranch = process.env.SOURCE_BRANCH;
