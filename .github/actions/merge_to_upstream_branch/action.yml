@@ -2,14 +2,17 @@ name: Merge a branch to an upstream branch
 description: Gets the name of the current pre-release branch.
 
 inputs:
+  github-token:
+    description: The GitHub token to use for accessing the REST API.
+    required: true
   source-branch:
     description: The name of the branch to merge.
     required: true
   upstream-branch:
     description: The name of the upstream branch to merge into.
     required: true
-  labels:
-    description: The labels to add to the pull request.
+  pull-request-label:
+    description: The label to add to the pull request if auto merge fails.
     required: false
 
 runs:
@@ -19,6 +22,7 @@ runs:
       id: merge_branch
       uses: actions/github-script@v6
       env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
         SOURCE_BRANCH: ${{ inputs.source-branch }}
         UPSTREAM_BRANCH: ${{ inputs.upstream-branch }}
       with:
@@ -27,6 +31,7 @@ runs:
           const upstreamBranch = process.env.UPSTREAM_BRANCH;
           try {
             await github.request('POST /repos/{owner}/{repo}/merges', {
+              token: process.env.GITHUB_TOKEN,
               owner: context.repo.owner,
               repo: context.repo.repo,
               base: upstreamBranch,
@@ -50,9 +55,10 @@ runs:
       if: steps.merge_branch.outputs.result != 'success'
       uses: actions/github-script@v6
       env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
         SOURCE_BRANCH: ${{ inputs.source-branch }}
         UPSTREAM_BRANCH: ${{ inputs.upstream-branch }}
-        LABEL: ${{ inputs.labels }}
+        LABEL: ${{ inputs.pull-request-label }}
       with:
         script: |
           const sourceBranch = process.env.SOURCE_BRANCH;
@@ -63,6 +69,7 @@ runs:
           }
 
           const { data: existingPullRequests } = await github.request('GET /repos/{owner}/{repo}/pulls', {
+            token: process.env.GITHUB_TOKEN,
             owner: context.repo.owner,
             repo: context.repo.repo,
             state: 'open',
@@ -76,6 +83,7 @@ runs:
           }
 
           const { dataa: pullRequest } = await github.request('POST /repos/{owner}/{repo}/pulls', {
+            token: process.env.GITHUB_TOKEN,
             owner: context.repo.owner,
             repo: context.repo.repo,
             title: `[BACKPORT] Failed auto merge from ${sourceBranch}`,

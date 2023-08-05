@@ -21,8 +21,10 @@ jobs:
         id: check_pull_request
         uses: ./.github/actions/merge_to_upstream_branch
         with:
-          upstream-branch: main
+          upstream-branch: main2
           source-branch: pre-release
+          github-token: ${{ secrets.ADMIN_GITHUB_TOKEN }}
+          pull-request-label: Failed Merge
       # - name: Merge pre-release to main
       #   id: commit_count
       #   uses: actions/github-script@v6
