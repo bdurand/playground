@@ -33,18 +33,17 @@ jobs:
                 continue;
               }
             }
-            console.log(`buildBranch = ${buildBranch}`);
 
             const refToBuild = `refs/heads/${buildBranch}`;
+            core.setOutput('ref', refToBuild);
             if (context.ref !== refToBuild) {
               core.warning(`Not deploying to staging; current build branch is ${buildBranch}`);
             }
-            return refToBuild;
       - name: Build Docker image
-        if: github.event.ref == steps.ref_to_build.outputs.result
+        if: github.event.ref == steps.ref_to_build.outputs.ref
         run: |
           echo "Build Docker image"
       - name: Run deployment
-        if: github.event.ref == steps.ref_to_build.outputs.result
+        if: github.event.ref == steps.ref_to_build.outputs.ref
         run: |
           echo "Deploying ${GITHUB_REF} to staging (${GITHUB_SHA})"
