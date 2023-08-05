@@ -1,5 +1,5 @@
 name: "* Release Candidate: Create"
-run-name: "Create Release Candidate"
+run-name: "Create Release Candidate From ${{ github.ref }}"
 
 on:
   workflow_dispatch:
