@@ -71,12 +71,11 @@ runs:
           });
 
           if (existingPullRequests.length > 0) {
-            console.log(existingPullRequests);
             core.notice(`Pull request already exists for ${sourceBranch} to ${upstreamBranch}: ${existingPullRequests[0].html_url}`);
             return;
           }
 
-          const { dataa: pullRequest } = await github.request('POST /repos/{owner}/{repo}/pulls', {
+          const { data: pullRequest } = await github.request('POST /repos/{owner}/{repo}/pulls', {
             owner: context.repo.owner,
             repo: context.repo.repo,
             title: `[BACKPORT] Failed auto merge from ${sourceBranch}`,
