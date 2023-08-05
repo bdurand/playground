@@ -57,10 +57,6 @@ runs:
         script: |
           const sourceBranch = process.env.SOURCE_BRANCH;
           const upstreamBranch = process.env.UPSTREAM_BRANCH;
-          const labels = [];
-          if (process.env.LABEL) {
-            labels.push(process.env.LABEL);
-          }
 
           const { data: existingPullRequests } = await github.request('GET /repos/{owner}/{repo}/pulls', {
             owner: context.repo.owner,
@@ -81,7 +77,15 @@ runs:
             title: `[BACKPORT] Failed auto merge from ${sourceBranch}`,
             head: sourceBranch,
             base: upstreamBranch,
-            labels: labels,
             body: `This pull request captures a failed merge from ${sourceBranch}. Please reconcile any merge conflicts and merge if appropriate.`
           });
           core.warning('Created pull request to handle the failed merge: ' + pullRequest.html_url);
+
+          if (process.env.LABEL) {
+            await github.request('POST /repos/{owner}/{repo}/issues/{issue_number}/labels', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pullRequest.number,
+              labels: [process.env.LABEL]
+            });
+          }
