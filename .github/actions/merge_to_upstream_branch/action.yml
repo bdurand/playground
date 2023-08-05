@@ -57,11 +57,10 @@ runs:
         script: |
           const sourceBranch = process.env.SOURCE_BRANCH;
           const upstreamBranch = process.env.UPSTREAM_BRANCH;
-          let labels = [];
+          const labels = [];
           if (process.env.LABEL) {
             labels.push(process.env.LABEL);
           }
-          console.log(labels);
 
           const { data: existingPullRequests } = await github.request('GET /repos/{owner}/{repo}/pulls', {
             owner: context.repo.owner,
