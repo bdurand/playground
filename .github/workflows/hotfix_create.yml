@@ -18,7 +18,7 @@ jobs:
         with:
           script: |
             if (!context.ref.startsWith('refs/tags/')) {
-              core.setFailed('This workflow must be run from a tag to ensure the hotfix is branched from a release');
+              core.setFailed('This workflow must be run from a tag to ensure the hotfix is branched from a release.');
               return;
             }
       - name: Create hotfix branch
