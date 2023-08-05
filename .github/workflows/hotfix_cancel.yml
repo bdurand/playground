@@ -1,4 +1,4 @@
-name: "Hotfix: Cancel"
+name: "* Hotfix: Cancel"
 
 on:
   workflow_dispatch:

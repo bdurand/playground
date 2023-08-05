@@ -1,4 +1,4 @@
-name: "Hotfix: Finalize"
+name: "* Hotfix: Finalize"
 
 on:
   workflow_dispatch:
