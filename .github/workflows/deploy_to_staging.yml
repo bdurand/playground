@@ -36,7 +36,9 @@ jobs:
             }
 
             const refToBuild = `refs/heads/${buildBranch}`;
-            if (context.ref !== refToBuild) {
+            if (context.ref === refToBuild) {
+              core.notice(`Current staging branch ${buildBranch}`);
+            } else {
               core.warning(`Not deploying to staging; current build branch is ${buildBranch}`);
             }
             return refToBuild;

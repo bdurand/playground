@@ -30,6 +30,7 @@ jobs:
               core.setFailed('Hotfix already in progress');
             } catch (error) {
               let sha = null;
+              console.log(context);
               let tag = context.inputs.tag;
 
               if (!tag) {
