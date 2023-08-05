@@ -22,7 +22,7 @@ runs:
       id: merge_branch
       uses: actions/github-script@v6
       env:
-        GITHUB_TOKEN: ${{ inputs.github-token }}
+        ADMIN_GITHUB_TOKEN: ${{ inputs.github-token }}
         SOURCE_BRANCH: ${{ inputs.source-branch }}
         UPSTREAM_BRANCH: ${{ inputs.upstream-branch }}
       with:
@@ -31,7 +31,7 @@ runs:
           const upstreamBranch = process.env.UPSTREAM_BRANCH;
           try {
             await github.request('POST /repos/{owner}/{repo}/merges', {
-              token: process.env.GITHUB_TOKEN,
+              auth: process.env.ADMIN_GITHUB_TOKEN,
               owner: context.repo.owner,
               repo: context.repo.repo,
               base: upstreamBranch,
