@@ -31,7 +31,7 @@ jobs:
                 buildBranch = branchName;
                 break;
               } catch (error) {
-                if (error.status !== 404)
+                if (error.status !== 404) {
                   throw error;
                 }
               }
