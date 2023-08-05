@@ -31,7 +31,8 @@ jobs:
             }
 
             let buildBranch = ['hotfix', 'pre-release'].find(async (branchName) => {
-              return await getBranch(branchName);
+              branchInfo = await getBranch(branchName);
+              return branchInfo;
             });
             if (!buildBranch) {
               buildBranch = 'main';
