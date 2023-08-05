@@ -23,12 +23,17 @@ jobs:
                 branch: 'pre-release',
               });
               core.setFailed('Cutover already in progress');
+              return;
             } catch (error) {
-              await github.request('POST /repos/{owner}/{repo}/git/refs', {
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                ref: 'refs/heads/pre-release',
-                sha: context.sha
-              });
-              core.notice('Created pre-release branch');
+              if (error.status !== 404) {
+                throw error;
+              }
             }
+
+            await github.request('POST /repos/{owner}/{repo}/git/refs', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/heads/pre-release',
+              sha: context.sha
+            });
+            core.notice('Created pre-release branch');

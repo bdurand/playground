@@ -23,7 +23,11 @@ jobs:
                 branch: 'pre-release'
               });
             } catch (error) {
+              if (error.status !== 404) {
+                throw error;
+              }
               core.setFailed('Not currently in cutover; pre-release branch does not exist');
+              return;
             }
 
             await github.request('DELETE /repos/{owner}/{repo}/git/refs/heads/{branch}', {

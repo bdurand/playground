@@ -27,40 +27,51 @@ jobs:
                 branch: 'hotfix',
               });
               core.setFailed('Hotfix already in progress');
+              return;
             } catch (error) {
-              let sha = null;
-              let tag = context.payload.inputs?.tag;
-
-              if (!tag) {
-                try {
-                  const { data: releaseInfo } = await github.request('GET /repos/{owner}/{repo}/releases/latest', {
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                  });
-                  console.log(releaseInfo)
-                  tag = releaseInfo.tag_name;
-                } catch (releaseError) {
-                  core.setFailed('No release found');
-                }
+              if (error.status !== 404) {
+                throw error;
               }
+            }
 
+            let sha = null;
+            let tag = context.payload.inputs?.tag;
+
+            if (!tag) {
               try {
-                const { data: tagInfo } = await github.request('GET /repos/{owner}/{repo}/git/ref/tags/{tag}', {
+                const { data: releaseInfo } = await github.request('GET /repos/{owner}/{repo}/releases/latest', {
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  tag: tag,
                 });
-                console.log(tagInfo);
-                sha = tagInfo.object.sha;
-              } catch (tagError) {
-                core.setFailed(`Tag ${tag} not found`);
+                tag = releaseInfo.tag_name;
+              } catch (releaseError) {
+                if (error.status !== 404) {
+                  throw error;
+                }
+                core.setFailed('No release found');
+                return;
               }
+            }
 
-              await github.request('POST /repos/{owner}/{repo}/git/refs', {
+            try {
+              const { data: tagInfo } = await github.request('GET /repos/{owner}/{repo}/git/ref/tags/{tag}', {
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                ref: 'refs/heads/hotfix',
-                sha: sha
+                tag: tag,
               });
-              core.notice('Created hotfix branch');
+              sha = tagInfo.object.sha;
+            } catch (tagError) {
+              if (error.status !== 404) {
+                throw error;
+              }
+              core.setFailed(`Tag ${tag} not found`);
+              return;
             }
+
+            await github.request('POST /repos/{owner}/{repo}/git/refs', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/heads/hotfix',
+              sha: sha
+            });
+            core.notice('Created hotfix branch');
