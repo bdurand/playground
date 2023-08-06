@@ -29,21 +29,15 @@ runs:
           }
           const tagName = `v${lastVersion + 1}`;
 
-          await github.request('POST /repos/{owner}/{repo}/git/refs', {
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            ref: `refs/tags/${tagName}`,
-            sha: context.sha
-          });
-          core.notice(`Created tag ${tagName}`);
-
           const { data: release } = await github.request('POST /repos/{owner}/{repo}/releases', {
             owner: context.repo.owner,
             repo: context.repo.repo,
             tag_name: tagName,
+            tag_commitish: context.sha,
             name: tagName,
-            body: `Release ${tagName}`,
+            generate_release_notes: true,
             draft: false,
-            prerelease: false
+            prerelease: false,
+            make_latest: false
           });
           core.notice(`Created release ${release.name}: ${release.html_url}`);
