@@ -1,4 +1,5 @@
-name: "Hotfix: Create"
+name: "* Hotfix: Create"
+run-name: "Create Hotfix From ${{ github.event.inputs.tag || 'Latest Release' }}"
 
 on:
   workflow_dispatch:
