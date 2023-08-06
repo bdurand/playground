@@ -28,7 +28,7 @@ runs:
               core.setFailed(`Invalid last release version: ${lastRelease.tag_name}`);
               return;
             }
-            const tagName = `v${lastVersion + 1};
+            const tagName = `v${lastVersion + 1}`;
 
             await github.request('POST /repos/{owner}/{repo}/git/refs', {
               owner: context.repo.owner,
