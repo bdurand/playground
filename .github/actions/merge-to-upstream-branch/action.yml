@@ -16,7 +16,7 @@ inputs:
     required: true
 
 runs:
-  using: "composite"
+  using: composite
   steps:
     - name: Merge banch
       id: merge_branch
@@ -27,9 +27,6 @@ runs:
       with:
         github-token: ${{ inputs.github-token }}
         script: |
-          if (process.env.CUSTOM_GITHUB_TOKEN) {
-            process.env.GITHUB_TOKEN = process.env.CUSTOM_GITHUB_TOKEN;
-          }
           const sourceBranch = process.env.SOURCE_BRANCH;
           const targetBranch = process.env.TARGET_BRANCH;
 

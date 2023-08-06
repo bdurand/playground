@@ -13,7 +13,9 @@ jobs:
     concurrency:
       group: hotfix
     steps:
-      - name: Delete hotfix branch
+      - name: Create release
+        uses: ./.github/actions/create-next-release
+      - name: Delete branch
         uses: actions/github-script@v6
         with:
           script: |
