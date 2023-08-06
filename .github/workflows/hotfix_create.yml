@@ -20,7 +20,6 @@ jobs:
       - name: Create hotfix branch
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.ADMIN_GITHUB_TOKEN }}
           script: |
             try {
               await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
@@ -70,7 +69,7 @@ jobs:
               return;
             }
 
-            await github.request('POST /repos/{owner}/{repo}/git/refs', {
+            await github.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
               ref: 'refs/heads/hotfix',
