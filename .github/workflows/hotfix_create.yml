@@ -69,7 +69,7 @@ jobs:
               return;
             }
 
-            await github.git.createRef({
+            await github.request('POST /repos/{owner}/{repo}/git/refs', {
               owner: context.repo.owner,
               repo: context.repo.repo,
               ref: 'refs/heads/hotfix',
