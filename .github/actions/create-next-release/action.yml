@@ -32,7 +32,7 @@ runs:
           await github.request('POST /repos/{owner}/{repo}/git/refs', {
             owner: context.repo.owner,
             repo: context.repo.repo,
-            ref: 'refs/tags/tagName',
+            ref: `refs/tags/${tagName}`,
             sha: context.sha
           });
           core.notice(`Created tag ${tagName}`);
