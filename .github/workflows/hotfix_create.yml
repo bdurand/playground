@@ -10,7 +10,7 @@ on:
 
 jobs:
   create:
-    name: Start hotfix
+    name: Create hotfix
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -74,6 +74,6 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               ref: 'refs/heads/hotfix',
-              sha: context.sha
+              sha: sha
             });
             core.notice('Created hotfix branch');
