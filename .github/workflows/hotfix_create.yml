@@ -78,4 +78,4 @@ jobs:
           fetch-depth: 0
       - name: Create branch
         run: |
-          git push origin HEAD:hotfix
+          git push origin HEAD:refs/heads/hotfix
