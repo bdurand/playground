@@ -17,7 +17,8 @@ jobs:
     concurrency:
       group: hotfix
     steps:
-      - name: Create hotfix branch
+      - name: Get Release SHA
+        id: get_release_sha
         uses: actions/github-script@v6
         with:
           script: |
@@ -69,10 +70,13 @@ jobs:
               return;
             }
 
-            await github.request('POST /repos/{owner}/{repo}/git/refs', {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: 'refs/heads/hotfix',
-              sha: sha
-            });
-            core.notice('Created hotfix branch');
+            core.setOutput('sha', sha);
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ steps.get_release_sha.outputs.sha }}
+          fetch-depth: 0
+      - name: Create branch
+        run: |
+          git branch hotfix
+          git push origin
