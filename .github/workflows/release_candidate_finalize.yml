@@ -13,6 +13,10 @@ jobs:
     concurrency:
       group: release-candidate
     steps:
+      - name: Load local GitHub actions
+        uses: actions/checkout@v3
+        with:
+          sparse-checkout: .github
       - name: Create release
         uses: ./.github/actions/create-next-release
       - name: Delete branch
