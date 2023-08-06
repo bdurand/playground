@@ -45,14 +45,14 @@ jobs:
             }
       - name: Merge hotfix to release-candidate
         if: steps.check_for_release_candidate.outputs.exists == 'true'
-        uses: ./.github/actions/merge_to_upstream_branch
+        uses: ./.github/actions/merge-to-upstream-branch
         with:
           target-branch: release-candidate
           source-branch: ${{ github.event.ref }}
           pull-request-label: Failed Merge
           github-token: ${{ secrets.ADMIN_GITHUB_TOKEN }}
       - name: Merge hotfix to main
-        uses: ./.github/actions/merge_to_upstream_branch
+        uses: ./.github/actions/merge-to-upstream-branch
         with:
           target-branch: main
           source-branch: ${{ github.event.ref }}

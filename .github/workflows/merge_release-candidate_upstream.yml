@@ -24,7 +24,7 @@ jobs:
           app_id: ${{ secrets.ACTION_APP_ID }}
           private_key: ${{ secrets.ACTION_APP_PRIVATE_KEY }}
       - name: Merge release-candidate to main
-        uses: ./.github/actions/merge_to_upstream_branch
+        uses: ./.github/actions/merge-to-upstream-branch
         with:
           target-branch: main
           source-branch: ${{ github.event.ref }}
