@@ -1,29 +1,25 @@
-name: "* Hotfix: Create"
-run-name: "Create Hotfix From ${{ github.event.ref }}"
+name: "Hotfix: Create"
 
 on:
   workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag to create hotfix from (defaults to the current release)
+        required: false
 
 jobs:
   create:
-    name: Create hotfix
+    name: Start hotfix
     runs-on: ubuntu-latest
     permissions:
       contents: write
     concurrency:
       group: hotfix
     steps:
-      - name: Ensure branching from tag
-        uses: actions/github-script@v6
-        with:
-          script: |
-            if (!context.ref.startsWith('refs/tags/')) {
-              core.setFailed('This workflow must be run from a tag to ensure the hotfix is branched from a release.');
-              return;
-            }
       - name: Create hotfix branch
         uses: actions/github-script@v6
         with:
+          github-token: ${{ secrets.ADMIN_GITHUB_TOKEN }}
           script: |
             try {
               await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
@@ -39,10 +35,44 @@ jobs:
               }
             }
 
+            let sha = null;
+            let tag = context.payload.inputs?.tag;
+
+            if (!tag) {
+              try {
+                const { data: releaseInfo } = await github.request('GET /repos/{owner}/{repo}/releases/latest', {
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                });
+                tag = releaseInfo.tag_name;
+              } catch (releaseError) {
+                if (error.status !== 404) {
+                  throw error;
+                }
+                core.setFailed('No release found');
+                return;
+              }
+            }
+
+            try {
+              const { data: tagInfo } = await github.request('GET /repos/{owner}/{repo}/git/ref/tags/{tag}', {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag: tag,
+              });
+              sha = tagInfo.object.sha;
+            } catch (tagError) {
+              if (error.status !== 404) {
+                throw error;
+              }
+              core.setFailed(`Tag ${tag} not found`);
+              return;
+            }
+
             await github.request('POST /repos/{owner}/{repo}/git/refs', {
               owner: context.repo.owner,
               repo: context.repo.repo,
               ref: 'refs/heads/hotfix',
-              sha: context.sha
+              sha: sha
             });
-            core.notice(`Created hotfix branch from ${context.ref}`);
+            core.notice('Created hotfix branch');
