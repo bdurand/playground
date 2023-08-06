@@ -44,6 +44,6 @@ runs:
             name: tagName,
             body: `Release ${tagName}`,
             draft: false,
-            prerelease: true
+            prerelease: false
           });
           core.notice(`Created release ${release.name}: ${release.html_url}`);
