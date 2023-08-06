@@ -25,10 +25,10 @@ jobs:
               await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                branch: 'release-candidate'',
+                branch: 'release-candidate'
               });
             } catch (error) {
-              if (error.status !== 404) {
+              if (error.status === 404) {
                 core.setFailed('Release candidate not in progress');
                 return
               } else {

@@ -32,7 +32,7 @@ jobs:
               await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                branch: 'hotfix',
+                branch: 'hotfix'
               });
               core.setFailed('Hotfix already in progress');
               return;
