@@ -1,0 +1,24 @@
+name: "Debug release"
+
+on:
+  workflow_dispatch:
+  release:
+    types:
+      - created
+      - edited
+      - published
+      - unpublished
+      - deleted
+      - prereleased
+      - released
+
+jobs:
+  get-release:
+    name: Debug
+    runs-on: ubuntu-latest
+    steps:
+      - name: Debug
+        uses: actions/github-script@v6
+        with:
+          script: |
+            console.log(context);

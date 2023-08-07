@@ -37,7 +37,7 @@ runs:
             name: tagName,
             generate_release_notes: true,
             draft: false,
-            prerelease: false,
+            prerelease: true,
             make_latest: 'false'
           });
           core.notice(`Created release ${release.name}: ${release.html_url}`);
