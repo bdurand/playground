@@ -5,8 +5,7 @@ on:
   workflow_dispatch:
   release:
     types:
-      - created
-      - edited
+      - released
 
 jobs:
   get-release:
@@ -16,38 +15,13 @@ jobs:
       ref: ${{ steps.get_release.outputs.ref }}
       sha: ${{ steps.get_release.outputs.sha }}
     steps:
-      - name: Check for latest release
-        id: check-for-latest-release
-        uses: actions/github-script@v6
-        with:
-          script: |
-            console.log(context);
-
-            let latest = false;
-            if (context.eventName === 'workflow_dispatch') {
-              latest = true;
-            } else {
-              const { data: latestRelease } = await github.request('GET /repos/{owner}/{repo}/releases/latest', {
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-              });
-              console.log(latestRelease);
-              if (latestRelease.tag_name === context.payload.release.tag_name) {
-                latest = true;
-              }
-            }
-
-            core.notice(`Latest release: ${latest}`);
-            core.setOutput('latest', latest);
       - name: Load local GitHub actions
         uses: actions/checkout@v3
-        if: ${{ steps.check-for-latest-release.outputs.latest == 'true' }}
         with:
           sparse-checkout: .github
       - name: Get release SHA
         id: get_release
         uses: ./.github/actions/get-release-sha
-        if: ${{ steps.check-for-latest-release.outputs.latest == 'true' }}
         with:
           tag: ${{ github.event.inputs.tag || github.event.release.tag_name }}
   build-image:
