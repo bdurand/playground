@@ -36,7 +36,6 @@ jobs:
     name: Build Docker image
     runs-on: ubuntu-latest
     needs: get-environment
-    if: needs.get-environment.outputs.environment != ''
     concurrency:
       group: "Build Docker image ${{ github.sha }}"
     steps:
@@ -54,7 +53,6 @@ jobs:
     needs:
       - get-environment
       - build-image
-    if: needs.get-environment.outputs.environment != ''
     concurrency:
       group: "Deploy to ${{ needs.get-environment.outputs.environment }}"
     environment: development
