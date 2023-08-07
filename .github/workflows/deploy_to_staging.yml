@@ -57,10 +57,12 @@ jobs:
             core.setOutput('ref', ref)
             core.setOutput('sha', sha);
       - name: Load local GitHub actions
+        if: steps.ref_to_build.outputs.ref
         uses: actions/checkout@v3
         with:
           sparse-checkout: .github
       - name: Deploy to staging
+        if: steps.ref_to_build.outputs.ref
         uses: ./.github/actions/deploy-application
         with:
           environment: staging
