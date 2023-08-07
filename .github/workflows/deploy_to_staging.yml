@@ -49,7 +49,7 @@ jobs:
             }
 
             if (context.ref === ref) {
-              core.notice(`Current staging branch ${buildBranch}`);
+              core.notice(`Current staging branch is ${buildBranch}`);
             } else {
               core.notice(`Not deploying to staging; current staging branch is ${buildBranch}`);
             }
