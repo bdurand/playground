@@ -31,7 +31,8 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
               });
-              if (latestRelease.tag_name === context.ref) {
+              console.log(latestRelease);
+              if (latestRelease.tag_name === context.payload.release.tag_name) {
                 latest = true;
               }
             }
