@@ -21,13 +21,14 @@ runs:
     - name: Merge banch
       id: merge_branch
       uses: actions/github-script@v6
+      env:
+        SOURCE_BRANCH: ${{ inputs.source-branch }}
+        TARGET_BRANCH: ${{ inputs.target-branch }}
       with:
-        source-branch: ${{ inputs.source-branch }}
-        target-branch: ${{ inputs.target-branch }}
         github-token: ${{ inputs.github-token }}
         script: |
-          const sourceBranch = core.getInput('source-branch');
-          const targetBranch = core.getInput('target-branch');
+          const sourceBranch = process.env.SOURCE_BRANCH;
+          const targetBranch = process.env.TARGET_BRANCH;
 
           try {
             await github.request('POST /repos/{owner}/{repo}/merges', {
@@ -53,13 +54,14 @@ runs:
     - name: Open pull request
       if: steps.merge_branch.outputs.merged != 'success'
       uses: actions/github-script@v6
+      env:
+        SOURCE_BRANCH: ${{ inputs.source-branch }}
+        TARGET_BRANCH: ${{ inputs.target-branch }}
+        LABEL: ${{ inputs.pull-request-label }}
       with:
-        source-branch: ${{ inputs.source-branch }}
-        target-branch: ${{ inputs.target-branch }}
-        label: ${{ inputs.pull-request-label }}
         script: |
-          const sourceBranch = core.getInput('source-branch');
-          const targetBranch = core.getInput('target-branch');
+          const sourceBranch = process.env.SOURCE_BRANCH;
+          const targetBranch = process.env.TARGET_BRANCH;
 
           const { data: existingPullRequests } = await github.request('GET /repos/{owner}/{repo}/pulls', {
             owner: context.repo.owner,
@@ -84,11 +86,11 @@ runs:
           });
           core.warning('Created pull request to handle the failed merge: ' + pullRequest.html_url);
 
-          if (core.getInput('label')) {
+          if (process.env.LABEL) {
             await github.request('POST /repos/{owner}/{repo}/issues/{issue_number}/labels', {
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: pullRequest.number,
-              labels: [core.getInput('label')]
+              labels: [process.env.LABEL]
             });
           }

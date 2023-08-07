@@ -20,12 +20,13 @@ runs:
     - name: Get release SHA
       id: get-sha
       uses: actions/github-script@v6
+      env:
+        TAG: ${{ inputs.tag }}
       with:
-        tag: ${{ inputs.tag }}
         script: |
           let sha = null;
           let ref = null;
-          let tag = core.getInput('tag');
+          let tag = process.env.TAG;
 
           if (!tag) {
             try {

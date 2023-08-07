@@ -21,9 +21,10 @@ runs:
         sha: ${{ inputs.sha }}
     - name: Deploy application
       uses: actions/github-script@v6
+      env:
+        ENVIRONMENT: ${{ inputs.environment }}
+        REF: ${{ inputs.ref }}
+        SHA: ${{ inputs.sha }}
       with:
-        environment: ${{ inputs.environment }}
-        ref: ${{ inputs.ref }}
-        sha: ${{ inputs.sha }}
         script: |
-          core.notice(`Deploying ${core.getInput('ref')} to ${core.getInput('environment')} (${core.getInput('sha')})`);
+          core.notice(`Deploying ${process.env.REF} to ${process.env.ENVIRONMENT} (${process.env.SHA})`);
