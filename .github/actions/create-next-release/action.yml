@@ -3,8 +3,8 @@ description: Create a release from the current context.
 
 inputs:
   github-token:
-    description: The GitHub token to use for the merge.
-    required: true
+    description: The GitHub token to use for API requests.
+    required: false
 
 runs:
   using: composite

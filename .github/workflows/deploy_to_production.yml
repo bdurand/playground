@@ -6,7 +6,6 @@ on:
   release:
     types:
       - released
-      - published
 
 jobs:
   get-release:
@@ -16,8 +15,6 @@ jobs:
       ref: ${{ steps.get_release.outputs.ref }}
       sha: ${{ steps.get_release.outputs.sha }}
     steps:
-      - name: debug
-        run: echo ${{ toJson(github.event) }}
       - name: Load local GitHub actions
         uses: actions/checkout@v3
         with:
