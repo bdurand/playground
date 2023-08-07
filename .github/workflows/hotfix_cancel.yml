@@ -1,0 +1,32 @@
+name: "* Hotfix: Cancel"
+run-name: "Cancel Hotfix"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  cancel:
+    name: Cancel hotfix
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: hotfix
+    steps:
+      - name: Delete hotfix branch
+        uses: actions/github-script@v6
+        with:
+          script: |
+            try {
+              await github.request('DELETE /repos/{owner}/{repo}/git/refs/heads/{branch}', {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                branch: 'hotfix'
+              });
+              core.notice('Deleted hot branch');
+            } catch (error) {
+              if (error.status !== 404) {
+                core.warning('No current hotfix');
+              }
+            }
+

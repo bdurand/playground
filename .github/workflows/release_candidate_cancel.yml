@@ -1,0 +1,32 @@
+name: "* Release Candidate: Cancel"
+run-name: "Cancel Release Candidate"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  cancel:
+    name: Cancel release candidate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: release-candidate
+    steps:
+      - name: Delete release-candidate branch
+        uses: actions/github-script@v6
+        with:
+          script: |
+            try {
+              await github.request('DELETE /repos/{owner}/{repo}/git/refs/heads/{branch}', {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                branch: 'release-candidate'
+              });
+              core.notice('Deleted release-candidate branch');
+            } catch (error) {
+              if (error.status !== 404) {
+                core.warning('No current release candidate');
+              }
+            }
+

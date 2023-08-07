@@ -1,0 +1,40 @@
+name: "* Release Candidate: Create"
+run-name: "Create Release Candidate From ${{ github.ref }}"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create:
+    name: Create release candidate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: release-candidate
+    steps:
+      - name: Create release-candidate branch
+        uses: actions/github-script@v6
+        with:
+          script: |
+            try {
+              await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                branch: 'release-candidate',
+              });
+              core.setFailed('Release candidate already in progress');
+              return;
+            } catch (error) {
+              if (error.status !== 404) {
+                throw error;
+              }
+            }
+
+            await github.request('POST /repos/{owner}/{repo}/git/refs', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/heads/release-candidate',
+              sha: context.sha
+            });
+            core.notice('Created release-candidate branch');

@@ -1,0 +1,63 @@
+name: "* Release Candidate: Finalize"
+run-name: "Finalize Release Candidate"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  finalize:
+    name: Finalize release candidate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: release-candidate
+    steps:
+      - name: Load local GitHub actions
+        uses: actions/checkout@v3
+        with:
+          sparse-checkout: .github
+      - name: Check for branch
+        uses: actions/github-script@v6
+        with:
+          script: |
+            try {
+              await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                branch: 'release-candidate'
+              });
+            } catch (error) {
+              if (error.status === 404) {
+                core.setFailed('Release candidate not in progress');
+                return
+              } else {
+                throw error;
+              }
+            }
+      - name: Create release
+        uses: ./.github/actions/create-next-release
+      - name: Delete branch
+        uses: actions/github-script@v6
+        with:
+          script: |
+            try {
+              await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                branch: 'release-candidate'
+              });
+            } catch (error) {
+              if (error.status !== 404) {
+                throw error;
+              }
+              core.setFailed('No current release candidate');
+              return;
+            }
+
+            await github.request('DELETE /repos/{owner}/{repo}/git/refs/heads/{branch}', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              branch: 'release-candidate'
+            });
+            core.notice('Deleted release-candidate branch');

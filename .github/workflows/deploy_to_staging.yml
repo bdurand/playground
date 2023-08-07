@@ -1,37 +1,57 @@
-name: Deploy To Staging
+name: "* Deploy To Staging"
+run-name: "Deploy To Staging"
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
-      - prerelease
+      - release-candidate
+      - hotfix
 
 jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
+    environment: staging
     steps:
-      - name: Check for prerelease branch
-        id: check_for_cutover
-        if: github.event.ref == 'refs/heads/main'
+      - name: Get branch to build
+        id: ref_to_build
         uses: actions/github-script@v6
         with:
+          result-encoding: string
           script: |
-            try {
-              const branchInfo = await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                branch: 'prerelease',
-              });
-              core.setOutput('prerelease', 'true')
-            } catch (error) {
-              core.setOutput('prerelease', 'false')
+            let buildBranch = 'main';
+            const branches = ['hotfix', 'release-candidate'];
+            for (let i = 0; i < branches.length; i++) {
+              branchName = branches[i];
+              try {
+                await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  branch: branchName
+                });
+                buildBranch = branchName;
+                break;
+              } catch (error) {
+                if (error.status !== 404) {
+                  throw error;
+                }
+              }
             }
+
+            const refToBuild = `refs/heads/${buildBranch}`;
+            if (context.ref === refToBuild) {
+              core.notice(`Current staging branch ${buildBranch}`);
+            } else {
+              core.notice(`Not deploying to staging; current staging branch is ${buildBranch}`);
+            }
+            return refToBuild;
       - name: Build Docker image
-        if: steps.check_for_cutover.outputs.prerelease == 'false' || github.event.ref == 'refs/heads/prerelease'
+        if: github.event.ref == steps.ref_to_build.outputs.result
         run: |
           echo "Build Docker image"
       - name: Run deployment
-        if: steps.check_for_cutover.outputs.prerelease == 'false' || github.event.ref == 'refs/heads/prerelease'
+        if: github.event.ref == steps.ref_to_build.outputs.result
         run: |
           echo "Deploying ${GITHUB_REF} to staging (${GITHUB_SHA})"

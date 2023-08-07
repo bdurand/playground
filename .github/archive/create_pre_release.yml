@@ -1,0 +1,114 @@
+name: Create release-candidate
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_candidate:
+        description: 'Release candidate'
+        required: true
+        default: '1'
+
+jobs:
+  create_pull_request:
+    concurrency:
+      group: create_pull_request
+    env:
+      RELEASE_CANDIDATE: ${{ inputs.release_candidate }}
+    name: Create Pull Request
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Load local GitHub actions
+        uses: actions/checkout@v3
+        with:
+          sparse-checkout: .github
+      - name: Get existing pull request
+        id: check_pull_request
+        uses: ./.github/actions/pre_release_branch
+      - name: Abort if release-candidate pull request exists
+        if: steps.check_pull_request.outputs.branch
+        env:
+          PULL_REQUEST_URL: ${{ steps.check_pull_request.outputs.url }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            core.setFailed('A release-candidate pull request already exists: ' + process.env.PULL_REQUEST_URL);
+      - name: Create branch
+        id: create_branch
+        uses: actions/github-script@v6
+        with:
+          result-encoding: string
+          script: |
+            const release = (new Date()).toISOString().slice(0, 10) + '.rc' + process.env.RELEASE_CANDIDATE;
+            core.exportVariable('RELEASE', release);
+            const branchName = 'release-candidate-' + release;
+            core.exportVariable('PRE_RELEASE_BRANCH', branchName);
+            try {
+              const branchInfo = await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                branch: branchName
+              });
+              core.warning('release-candidate branch '+ branchName + ' already exists');
+            } catch(error) {
+              await github.request('POST /repos/{owner}/{repo}/git/refs', {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: 'refs/heads/' + branchName,
+                sha: context.sha
+              });
+              core.notice('Created release-candidate branch: ' + branchName);
+              core.setOutput('created', 'true');
+            }
+            return branchName;
+      - name: Checkout branch
+        if: steps.create_branch.outputs.created == 'true'
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.PRE_RELEASE_BRANCH }}
+      - name: Touch release
+        if: steps.create_branch.outputs.created == 'true'
+        run: |
+          echo ${RELEASE} > RELEASE
+          git config user.email "releasebot@example.com"
+          git config user.name "ReleaseBot"
+          git add RELEASE
+          git commit -m "Set release"
+          git push origin ${PRE_RELEASE_BRANCH}
+      - name: Create pull request
+        if: steps.check_pull_request.outputs.exists != 'true'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const pullRequests = await github.request('GET /repos/{owner}/{repo}/pulls', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              head: context.repo.owner + ':' + process.env.PRE_RELEASE_BRANCH
+            });
+            let pullRequest = pullRequests.data[0];
+
+            if (pullRequest) {
+              core.warning('Pull request already exists: ' + pullRequest.html_url);
+            } else {
+              const createResponse = await github.request('POST /repos/{owner}/{repo}/pulls', {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: 'release-candidate ' + process.env.RELEASE,
+                head: process.env.PRE_RELEASE_BRANCH,
+                base: 'main',
+                labels: ['release-candidate'],
+                body: 'This is a release-candidate pull request. It will be merged when the release is ready.'
+              });
+              pullRequest = createResponse.data;
+              core.notice('Created pull request: ' + pullRequest.html_url);
+            }
+
+            await github.request('POST /repos/{owner}/{repo}/issues/{issue_number}/labels', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pullRequest.number,
+              labels: ['release-candidate']
+            });

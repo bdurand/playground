@@ -1,0 +1,27 @@
+name: "* Deploy To Development"
+run-name: "Deploy to ${{ github.event.inputs.environment }} (${{ github.sha }})"
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        type: choice
+        options:
+          - alfa
+          - beta
+          - gamma
+          - delta
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: development
+    env:
+      DEPLOY_TO_ENVIRONMENT: ${{ github.event.inputs.environment }}
+    steps:
+      - name: Run deployment
+        run: |
+          echo "Deploying ${GITHUB_REF} to ${DEPLOY_TO_ENVIRONMENT} (${GITHUB_SHA})"

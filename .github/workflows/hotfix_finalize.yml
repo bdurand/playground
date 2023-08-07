@@ -1,0 +1,65 @@
+name: "* Hotfix: Finalize"
+run-name: "Finalize Hotfix"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  finalize:
+    name: Finalize hotfix
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: hotfix
+    steps:
+      - name: Load local GitHub actions
+        uses: actions/checkout@v3
+        with:
+          sparse-checkout: .github
+      - name: Check for branch
+        uses: actions/github-script@v6
+        with:
+          script: |
+            try {
+              await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                branch: 'hotfix'
+              });
+            } catch (error) {
+              if (error.status === 404) {
+                core.setFailed('Hotfix not in progress');
+                return
+              } else {
+                throw error;
+              }
+            }
+      - name: Create release
+        uses: ./.github/actions/create-next-release
+      - name: Delete branch
+        uses: actions/github-script@v6
+        with:
+          script: |
+            let sha = null;
+            try {
+              const { data: branchInfo } = await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                branch: 'hotfix'
+              });
+              sha = branchInfo.commit.sha;
+            } catch (error) {
+              if (error.status !== 404) {
+                throw error;
+              }
+              core.setFailed('No hotfix branch exists');
+              return;
+            }
+
+            await github.request('DELETE /repos/{owner}/{repo}/git/refs/heads/{branch}', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              branch: 'hotfix'
+            });
+            core.notice('Deleted hotfix branch');

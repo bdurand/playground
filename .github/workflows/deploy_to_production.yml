@@ -1,6 +1,8 @@
-name: Deploy To Production
+name: "* Deploy To Production"
+run-name: "Deploy To Production"
 
 on:
+  workflow_dispatch:
   release:
     types: released
 
@@ -8,6 +10,7 @@ jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - name: Run deployment
         run: |
