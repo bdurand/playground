@@ -1,5 +1,5 @@
 name: "* Deploy To Production"
-run-name: "Deploy To Production"
+run-name: "Deploy ${{ github.event.inputs.tag || 'Latest Release' }} To Production"
 
 on:
   workflow_dispatch:
