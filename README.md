@@ -2,6 +2,8 @@
 
 Playground for testing GitHub actions and integrations...
 
+Test PR 2
+
 ## Development
 
 - All changes are made in feature branches and merged into the `main` branch via pull requests.
