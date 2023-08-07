@@ -1,0 +1,35 @@
+name: Deploy Development From Label
+
+on:
+  pull_request:
+    types:
+      - labeled
+
+jobs:
+  build:
+    name: Deploy to development from label
+    runs-on: ubuntu-latest
+    environment: development
+    if: startsWith(github.event.label.name, 'Deploy to ')
+    steps:
+      - name: Get environment
+        id: environment
+        env:
+          LABEL: ${{ github.event.label.name }}
+        run: |
+          echo "value=${LABLE/#'Deploy to '}" >> $GITHUB_OUTPUT
+      - name: Remove Deploy Label
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.removeLabel({
+              owner: context.payload.organization.login,
+              repo: context.payload.repository.name,
+              issue_number: context.payload.pull_request.number,
+              name: context.payload.label.name
+            })
+      - name: Run deployment
+        env:
+          DEPLOY_TO_ENVIRONMENT: ${{ steps.environment.outputs.value }}
+        run: |
+          echo "Deploying ${GITHUB_REF} to ${DEPLOY_TO_ENVIRONMENT} (${GITHUB_SHA})"
