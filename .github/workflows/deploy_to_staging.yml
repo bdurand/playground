@@ -10,13 +10,11 @@ on:
       - hotfix
 
 jobs:
-  deploy:
-    name: Deploy
+  get-branch:
     runs-on: ubuntu-latest
-    concurrency:
-      group: "Deploy to staging"
-      cancel-in-progress: true
-    environment: staging
+    outputs:
+      ref: ${{ steps.ref_to_build.outputs.ref }}
+      sha: ${{ steps.ref_to_build.outputs.sha }}
     steps:
       - name: Get branch to build
         id: ref_to_build
@@ -56,15 +54,42 @@ jobs:
 
             core.setOutput('ref', ref)
             core.setOutput('sha', sha);
+  build-image:
+    name: Build Docker image
+    runs-on: ubuntu-latest
+    needs: get-branch
+    concurrency:
+      group: "Build Docker image ${{ needs.get-branch.outputs.sha }}"
+    steps:
       - name: Load local GitHub actions
-        if: steps.ref_to_build.outputs.ref
+        uses: actions/checkout@v3
+        with:
+          sparse-checkout: .github
+      - name: Build Docker image
+        uses: ./.github/actions/build-docker-image
+        with:
+          sha: ${{ needs.get-branch.outputs.sha }}
+  deploy:
+    name: Deploy to staging
+    runs-on: ubuntu-latest
+    if: needs.get-branch.outputs.ref
+    needs:
+      - get-branch
+      - build-image
+    concurrency:
+      group: "Deploy to staging"
+      cancel-in-progress: true
+    environment: staging
+    steps:
+      - name: Load local GitHub actions
+        if: needs.get-branch.outputs.ref
         uses: actions/checkout@v3
         with:
           sparse-checkout: .github
       - name: Deploy to staging
-        if: steps.ref_to_build.outputs.ref
+        if: needs.get-branch.outputs.ref
         uses: ./.github/actions/deploy-application
         with:
           environment: staging
-          sha: ${{ steps.ref_to_build.outputs.sha }}
-          ref: ${{ steps.ref_to_build.outputs.ref }}
+          sha: ${{ needs.get-branch.outputs.sha }}
+          ref: ${{ needs.get-branch.outputs.ref }}
