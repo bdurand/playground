@@ -14,8 +14,7 @@ jobs:
     name: Build Docker Image
     runs-on: ubuntu-latest
     concurrency:
-      group: ${{ github.event.pull_request.number || github.sha }}
-      cancel-in-progress: true
+      group: "Build Docker Image ${{ github.event.pull_request.number || github.sha }}"
     steps:
       - name: Check for build tags
         id: check_tags

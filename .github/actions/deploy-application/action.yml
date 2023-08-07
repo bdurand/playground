@@ -15,10 +15,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Build Docker image
-      uses: ./.github/actions/build-docker-image
-      with:
-        sha: ${{ inputs.sha }}
     - name: Deploy application
       uses: actions/github-script@v6
       env:
