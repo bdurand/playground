@@ -37,6 +37,7 @@ jobs:
                   branch: branchName
                 });
                 buildBranch = branchName;
+                console.log(branch)
                 ref = branch.ref;
                 sha = branch.commit.sha;
                 break;
