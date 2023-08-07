@@ -31,3 +31,5 @@ jobs:
         uses: ./.github/actions/deploy-application
         with:
           environment: ${{ github.event.inputs.environment }}
+          sha: ${{ github.sha }}
+          ref: ${{ github.ref }}

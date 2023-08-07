@@ -42,3 +42,5 @@ jobs:
         uses: ./.github/actions/deploy-application
         with:
           environment: ${{ steps.environment.outputs.value }}
+          sha: ${{ github.sha }}
+          ref: ${{ github.ref }}

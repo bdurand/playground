@@ -40,3 +40,5 @@ jobs:
       - name: Build Image
         if: steps.check_tags.outputs.build == 'true' || github.event_name == 'workflow_dispatch'
         uses: ./.github/actions/build-docker-image
+        with:
+          sha: ${{ github.sha }}

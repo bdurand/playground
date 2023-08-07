@@ -34,10 +34,9 @@ jobs:
           private_key: ${{ secrets.ACTION_APP_PRIVATE_KEY }}
       - name: Create hotfix branch
         uses: actions/github-script@v6
-        env:
-          SHA: ${{ steps.release_sha.outputs.sha }}
         with:
           github-token: ${{ steps.generate_token.outputs.token }}
+          sha: ${{ steps.release_sha.outputs.sha }}
           script: |
             try {
               await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
@@ -57,6 +56,6 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               ref: 'refs/heads/hotfix',
-              sha: process.env.SHA
+              sha: core.getInput('sha')
             });
             core.notice('Created hotfix branch');

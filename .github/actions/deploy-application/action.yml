@@ -5,13 +5,25 @@ inputs:
   environment:
     description: The environment being to deploy to.
     required: true
+  sha:
+    description: The SHA of the release to deploy.
+    required: true
+  ref:
+    description: The ref of the release to deploy.
+    required: true
 
 runs:
   using: composite
   steps:
     - name: Build Docker image
       uses: ./.github/actions/build-docker-image
+      with:
+        sha: ${{ inputs.sha }}
     - name: Deploy application
-      shell: bash
-      run: |
-          echo "Deploying ${GITHUB_REF} to ${{ inputs.environment }} (${GITHUB_SHA})"
+      uses: actions/github-script@v6
+      with:
+        environment: ${{ inputs.environment }}
+        ref: ${{ inputs.ref }}
+        sha: ${{ inputs.sha }}
+        script: |
+          core.notice(`Deploying ${core.getInput('ref')} to ${core.getInput('environment')} (${core.getInput('sha')})`);
