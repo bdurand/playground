@@ -1,5 +1,5 @@
 name: "* Deploy To Production"
-run-name: "Deploy ${{ github.event.inputs.tag || 'Latest Release' }} To Production"
+run-name: "Deploy ${{ github.event.inputs.tag || github.event.ref || 'Latest Release' }} To Production"
 
 on:
   workflow_dispatch:
@@ -24,10 +24,11 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
+            console.log(context)
             const {data: release } = await github.request('GET /repos/{owner}/{repo}/releases/tags/{tag}', {
               owner: context.repo.owner,
               repo: context.repo.repo,
-              tag: event.inputs.tag
+              tag: context.inputs.tag
             });
 
             await github.request('PATCH /repos/{owner}/{repo}/releases/{release_id}', {
