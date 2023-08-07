@@ -10,6 +10,9 @@ jobs:
   build:
     name: Deploy to development from label
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.event.label.name }}
+      cancel-in-progress: true
     environment: development
     if: startsWith(github.event.label.name, 'Deploy to ')
     permissions:

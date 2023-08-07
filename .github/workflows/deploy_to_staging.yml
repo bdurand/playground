@@ -13,6 +13,9 @@ jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
+    concurrency:
+      group: "Deploy to staging"
+      cancel-in-progress: true
     environment: staging
     steps:
       - name: Get branch to build

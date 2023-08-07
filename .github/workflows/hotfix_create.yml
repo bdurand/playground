@@ -17,6 +17,15 @@ jobs:
     concurrency:
       group: hotfix
     steps:
+      - name: Load local GitHub actions
+        uses: actions/checkout@v3
+        with:
+          sparse-checkout: .github
+      - name: Get release SHA
+        id: release_sha
+        uses: ./.github/actions/get-release-sha
+        with:
+          tag: ${{ github.event.inputs.tag }}
       - name: Generate a token for the action app
         id: generate_token
         uses: tibdex/github-app-token@v1.8.0
@@ -25,6 +34,8 @@ jobs:
           private_key: ${{ secrets.ACTION_APP_PRIVATE_KEY }}
       - name: Create hotfix branch
         uses: actions/github-script@v6
+        env:
+          SHA: ${{ steps.release_sha.outputs.sha }}
         with:
           github-token: ${{ steps.generate_token.outputs.token }}
           script: |
@@ -42,44 +53,10 @@ jobs:
               }
             }
 
-            let sha = null;
-            let tag = context.payload.inputs?.tag;
-
-            if (!tag) {
-              try {
-                const { data: releaseInfo } = await github.request('GET /repos/{owner}/{repo}/releases/latest', {
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                });
-                tag = releaseInfo.tag_name;
-              } catch (releaseError) {
-                if (error.status !== 404) {
-                  throw error;
-                }
-                core.setFailed('No release found');
-                return;
-              }
-            }
-
-            try {
-              const { data: tagInfo } = await github.request('GET /repos/{owner}/{repo}/git/ref/tags/{tag}', {
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                tag: tag,
-              });
-              sha = tagInfo.object.sha;
-            } catch (tagError) {
-              if (error.status !== 404) {
-                throw error;
-              }
-              core.setFailed(`Tag ${tag} not found`);
-              return;
-            }
-
             await github.request('POST /repos/{owner}/{repo}/git/refs', {
               owner: context.repo.owner,
               repo: context.repo.repo,
               ref: 'refs/heads/hotfix',
-              sha: sha
+              sha: process.env.SHA
             });
             core.notice('Created hotfix branch');

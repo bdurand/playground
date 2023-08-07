@@ -1,0 +1,63 @@
+name: Get Release SHA
+description: Get the SHA of a specific tag or the current release if no tag is specified.
+
+inputs:
+  tag:
+    description: The tag to get the sha for.
+    required: false
+
+outputs:
+  sha:
+    description: The SHA of the release tag.
+    value: ${{ steps.get-sha.outputs.sha }}
+  ref:
+    description: The ref of tag that was used to get the SHA.
+    value: ${{ steps.get-sha.outputs.ref }}
+
+runs:
+  using: composite
+  steps:
+    - name: Get release SHA
+      uses: actions/github-script@v6
+      env:
+        TAG: ${{ inputs.tag }}
+      with:
+        script: |
+          let sha = null;
+          let ref = null;
+          let tag = process.env.TAG;
+
+          if (!tag) {
+            try {
+              const { data: releaseInfo } = await github.request('GET /repos/{owner}/{repo}/releases/latest', {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+              });
+              tag = releaseInfo.tag_name;
+            } catch (releaseError) {
+              if (error.status !== 404) {
+                throw error;
+              }
+              core.setFailed('No release found');
+              return;
+            }
+          }
+
+          try {
+            const { data: tagInfo } = await github.request('GET /repos/{owner}/{repo}/git/ref/tags/{tag}', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag: tag,
+            });
+            sha = tagInfo.object.sha;
+            ref = tagInfo.ref;
+          } catch (tagError) {
+            if (error.status !== 404) {
+              throw error;
+            }
+            core.setFailed(`Tag ${tag} not found`);
+            return;
+          }
+
+          core.setOutput('sha', sha);
+          core.setOutput('ref', ref);
