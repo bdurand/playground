@@ -30,7 +30,7 @@ jobs:
               tag: event.inputs.tag
             });
 
-            await github.request('PATCH /repos/{owner}/{repo}/releases/{release_id}' {
+            await github.request('PATCH /repos/{owner}/{repo}/releases/{release_id}', {
               owner: context.repo.owner,
               repo: context.repo.repo,
               release_id: release.id,
