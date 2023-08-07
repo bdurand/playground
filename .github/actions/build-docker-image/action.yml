@@ -1,0 +1,16 @@
+name: Build Docker Image
+description: Build the Docker image for the current branch.
+
+inputs:
+  sha:
+    description: The SHA to build the image for.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Build Image
+      uses: actions/github-script@v6
+      with:
+        script: |
+          core.notice(`Building Docker image for ${context.sha}`);

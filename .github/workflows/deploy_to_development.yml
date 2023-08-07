@@ -18,10 +18,18 @@ jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
+    concurrency:
+      group: "Deploy to ${{ github.event.inputs.environment }}"
+      cancel-in-progress: true
     environment: development
-    env:
-      DEPLOY_TO_ENVIRONMENT: ${{ github.event.inputs.environment }}
     steps:
-      - name: Run deployment
-        run: |
-          echo "Deploying ${GITHUB_REF} to ${DEPLOY_TO_ENVIRONMENT} (${GITHUB_SHA})"
+      - name: Load local GitHub actions
+        uses: actions/checkout@v3
+        with:
+          sparse-checkout: .github
+      - name: Build Image
+        uses: ./.github/actions/deploy-application
+        with:
+          environment: ${{ github.event.inputs.environment }}
+          sha: ${{ github.sha }}
+          ref: ${{ github.ref }}

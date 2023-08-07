@@ -10,6 +10,9 @@ jobs:
   build:
     name: Deploy to development from label
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.event.label.name }}
+      cancel-in-progress: true
     environment: development
     if: startsWith(github.event.label.name, 'Deploy to ')
     permissions:
@@ -31,8 +34,13 @@ jobs:
               issue_number: context.payload.pull_request.number,
               name: context.payload.label.name
             })
-      - name: Run deployment
-        env:
-          DEPLOY_TO_ENVIRONMENT: ${{ steps.environment.outputs.value }}
-        run: |
-          echo "Deploying ${GITHUB_REF} to ${DEPLOY_TO_ENVIRONMENT} (${GITHUB_SHA})"
+      - name: Load local GitHub actions
+        uses: actions/checkout@v3
+        with:
+          sparse-checkout: .github
+      - name: Build Image
+        uses: ./.github/actions/deploy-application
+        with:
+          environment: ${{ steps.environment.outputs.value }}
+          sha: ${{ github.sha }}
+          ref: ${{ github.ref }}

@@ -1,0 +1,30 @@
+name: Deploy Application
+description: Deploy the application to the specified environment.
+
+inputs:
+  environment:
+    description: The environment being to deploy to.
+    required: true
+  sha:
+    description: The SHA of the release to deploy.
+    required: true
+  ref:
+    description: The ref of the release to deploy.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Build Docker image
+      uses: ./.github/actions/build-docker-image
+      with:
+        sha: ${{ inputs.sha }}
+    - name: Deploy application
+      uses: actions/github-script@v6
+      env:
+        ENVIRONMENT: ${{ inputs.environment }}
+        REF: ${{ inputs.ref }}
+        SHA: ${{ inputs.sha }}
+      with:
+        script: |
+          core.notice(`Deploying ${process.env.REF} to ${process.env.ENVIRONMENT} (${process.env.SHA})`);

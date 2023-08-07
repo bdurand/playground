@@ -3,6 +3,10 @@ run-name: "Deploy To Production"
 
 on:
   workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag to deploy (defaults to the current release)
+        required: false
   release:
     types: released
 
@@ -10,8 +14,22 @@ jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
+    concurrency:
+      group: "Deploy to production"
+      cancel-in-progress: true
     environment: production
     steps:
-      - name: Run deployment
-        run: |
-          echo "Deploying ${GITHUB_REF} to production (${GITHUB_SHA})"
+      - name: Load local GitHub actions
+        uses: actions/checkout@v3
+        with:
+          sparse-checkout: .github
+      - name: Get release SHA
+        id: release_sha
+        uses: ./.github/actions/get-release-sha
+        with:
+          tag: ${{ github.event.inputs.tag || github.event.release.tag_name }}
+      - name: Deploy application
+        uses: ./.github/actions/deploy-application
+        with:
+          ref: ${{ steps.release_sha.outputs.ref }}
+          sha: ${{ steps.release_sha.outputs.sha }}

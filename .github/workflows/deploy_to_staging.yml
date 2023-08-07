@@ -13,6 +13,9 @@ jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
+    concurrency:
+      group: "Deploy to staging"
+      cancel-in-progress: true
     environment: staging
     steps:
       - name: Get branch to build
@@ -21,17 +24,22 @@ jobs:
         with:
           result-encoding: string
           script: |
-            let buildBranch = 'main';
-            const branches = ['hotfix', 'release-candidate'];
+            let buildBranch = null;
+            let ref = null;
+            let sha = null;
+
+            const branches = ['hotfix', 'release-candidate', 'main'];
             for (let i = 0; i < branches.length; i++) {
               branchName = branches[i];
               try {
-                await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
+                const { data: branch } = await github.request('GET /repos/{owner}/{repo}/branches/{branch}', {
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   branch: branchName
                 });
                 buildBranch = branchName;
+                ref = branch.ref;
+                sha = branch.commit.sha;
                 break;
               } catch (error) {
                 if (error.status !== 404) {
@@ -40,18 +48,23 @@ jobs:
               }
             }
 
-            const refToBuild = `refs/heads/${buildBranch}`;
-            if (context.ref === refToBuild) {
-              core.notice(`Current staging branch ${buildBranch}`);
+            if (context.ref === ref) {
+              core.notice(`Current staging branch is ${buildBranch}`);
             } else {
               core.notice(`Not deploying to staging; current staging branch is ${buildBranch}`);
             }
-            return refToBuild;
-      - name: Build Docker image
-        if: github.event.ref == steps.ref_to_build.outputs.result
-        run: |
-          echo "Build Docker image"
-      - name: Run deployment
-        if: github.event.ref == steps.ref_to_build.outputs.result
-        run: |
-          echo "Deploying ${GITHUB_REF} to staging (${GITHUB_SHA})"
+
+            core.setOutput('ref', ref)
+            core.setOutput('sha', sha);
+      - name: Load local GitHub actions
+        if: steps.ref_to_build.outputs.ref
+        uses: actions/checkout@v3
+        with:
+          sparse-checkout: .github
+      - name: Deploy to staging
+        if: steps.ref_to_build.outputs.ref
+        uses: ./.github/actions/deploy-application
+        with:
+          environment: staging
+          sha: ${{ steps.ref_to_build.outputs.sha }}
+          ref: ${{ steps.ref_to_build.outputs.ref }}
