@@ -60,7 +60,6 @@ jobs:
       - name: Build Docker image
         uses: ./.github/actions/build-docker-image
         with:
-          ref: ${{ needs.get-release.outputs.ref }}
           sha: ${{ needs.get-release.outputs.sha }}
   deploy:
     name: Deploy to production
