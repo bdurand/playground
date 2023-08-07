@@ -1,4 +1,5 @@
 name: "* Deploy To Staging"
+run-name: "Deploy to staging (${{ github.ref }})"
 
 on:
   workflow_dispatch:
@@ -12,6 +13,7 @@ jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
+    environment: staging
     steps:
       - name: Get branch to build
         id: ref_to_build

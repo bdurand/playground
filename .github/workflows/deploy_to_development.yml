@@ -1,5 +1,5 @@
 name: "* Deploy To Development"
-run-name: Deploy To ${{ github.event.inputs.environment }}
+run-name: "Deploy to ${{ github.event.inputs.environment }} (${{ github.sha }})"
 
 on:
   workflow_dispatch:
@@ -18,6 +18,7 @@ jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
+    environment: development
     env:
       DEPLOY_TO_ENVIRONMENT: ${{ github.event.inputs.environment }}
     steps:
