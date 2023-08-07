@@ -1,5 +1,5 @@
 name: "* Deploy To Staging"
-run-name: "Deploy to staging (${{ github.ref }})"
+run-name: "Deploy To Staging
 
 on:
   workflow_dispatch:
