@@ -21,14 +21,19 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            console.log(context)
+            console.log(context);
+
             let latest = false;
-            const { data: latestRelease } = await github.repos.getLatestRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-            });
-            if (latestRelease.tag_name === context.ref) {
+            if (context.eventName === 'workflow_dispatch') {
               latest = true;
+            } else {
+              const { data: latestRelease } = await github.request('GET /repos/{owner}/{repo}/releases/latest', {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+              });
+              if (latestRelease.tag_name === context.ref) {
+                latest = true;
+              }
             }
 
             core.notice(`Latest release: ${latest}`);
