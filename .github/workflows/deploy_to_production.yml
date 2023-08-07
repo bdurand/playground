@@ -3,6 +3,10 @@ run-name: "Deploy To Production"
 
 on:
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to deploy (defaults to current release)"
+        required: false
   release:
     types:
       - released
@@ -15,6 +19,23 @@ jobs:
       ref: ${{ steps.get_release.outputs.ref }}
       sha: ${{ steps.get_release.outputs.sha }}
     steps:
+      - name: Set current release
+        if: ${{ github.event.inputs.tag }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const {data: release } = await github.request('GET /repos/{owner}/{repo}/releases/tags/{tag}', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag: event.inputs.tag
+            });
+
+            await github.request('PATCH /repos/{owner}/{repo}/releases/{release_id}' {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: release.id,
+              make_latest: true
+            });
       - name: Load local GitHub actions
         uses: actions/checkout@v3
         with:
