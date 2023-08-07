@@ -9,6 +9,7 @@ on:
         required: true
         type: choice
         options:
+          - '-'
           - alfa
           - beta
           - gamma
@@ -16,7 +17,7 @@ on:
 
 jobs:
   build-image:
-    name: Deploy
+    name: Build Docker image
     runs-on: ubuntu-latest
     concurrency:
       group: "Build Docker Image ${{ github.sha }}"
@@ -30,7 +31,7 @@ jobs:
         with:
           sha: ${{ github.sha }}
   deploy:
-    name: Deploy
+    name: Deploy to ${{ github.event.inputs.environment }}
     runs-on: ubuntu-latest
     needs: build-image
     concurrency:
