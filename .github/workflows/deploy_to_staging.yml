@@ -47,6 +47,7 @@ jobs:
               }
             }
 
+            core.notice(`ref: ${ref}, context.ref: ${context.ref}`)
             if (context.ref === ref) {
               core.notice(`Current staging branch is ${buildBranch}`);
             } else {
