@@ -47,11 +47,11 @@ jobs:
               core.notice(`Not deploying to staging; current staging branch is ${buildBranch}`);
             }
             return refToBuild;
-      - name: Build Docker image
-        if: github.event.ref == steps.ref_to_build.outputs.result
-        run: |
-          echo "Build Docker image"
-      - name: Run deployment
-        if: github.event.ref == steps.ref_to_build.outputs.result
-        run: |
-          echo "Deploying ${GITHUB_REF} to staging (${GITHUB_SHA})"
+      - name: Load local GitHub actions
+        uses: actions/checkout@v3
+        with:
+          sparse-checkout: .github
+      - name: Build Image
+        uses: ./.github/actions/deploy-application
+        with:
+          environment: staging

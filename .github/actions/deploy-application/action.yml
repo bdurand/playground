@@ -1,0 +1,17 @@
+name: Deploy Application
+description: Deploy the application to the specified environment.
+
+inputs:
+  environment:
+    description: The environment being to deploy to.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Build Docker image
+      uses: ./.github/actions/build-docker-image
+    - name: Deploy application
+      shell: bash
+      run: |
+          echo "Deploying ${GITHUB_REF} to ${{ inputs.environment }} (${GITHUB_SHA})"

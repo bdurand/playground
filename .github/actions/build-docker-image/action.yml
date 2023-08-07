@@ -1,0 +1,10 @@
+name: Build Docker Image
+description: Build the Docker image for the current branch.
+
+runs:
+  using: composite
+  steps:
+    - name: Build Image
+      shell: bash
+      run: |
+        echo "Build Docker image"

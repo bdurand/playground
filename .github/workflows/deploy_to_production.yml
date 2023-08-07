@@ -12,6 +12,11 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
-      - name: Run deployment
-        run: |
-          echo "Deploying ${GITHUB_REF} to production (${GITHUB_SHA})"
+      - name: Load local GitHub actions
+        uses: actions/checkout@v3
+        with:
+          sparse-checkout: .github
+      - name: Build Image
+        uses: ./.github/actions/deploy-application
+        with:
+          environment: production

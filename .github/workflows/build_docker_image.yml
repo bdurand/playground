@@ -32,7 +32,11 @@ jobs:
             } else {
               core.setOutput('build', 'false')
             }
+      - name: Load local GitHub actions
+        if: steps.check_tags.outputs.build == 'true' || github.event_name == 'workflow_dispatch'
+        uses: actions/checkout@v3
+        with:
+          sparse-checkout: .github
       - name: Build Image
         if: steps.check_tags.outputs.build == 'true' || github.event_name == 'workflow_dispatch'
-        run: |
-          echo "Build Docker image"
+        uses: ./.github/actions/build-docker-image
