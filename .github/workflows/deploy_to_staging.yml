@@ -11,12 +11,13 @@ on:
 
 jobs:
   get-branch:
+    name: Check if branch should be built
     runs-on: ubuntu-latest
     outputs:
       ref: ${{ steps.ref_to_build.outputs.ref }}
       sha: ${{ steps.ref_to_build.outputs.sha }}
     steps:
-      - name: Get branch to build
+      - name: Get current staging branch
         id: ref_to_build
         uses: actions/github-script@v6
         with:
@@ -73,7 +74,7 @@ jobs:
   deploy:
     name: Deploy to staging
     runs-on: ubuntu-latest
-    if: needs.get-branch.outputs.ref
+    if: needs.get-branch.outputs.sha
     needs:
       - get-branch
       - build-image
