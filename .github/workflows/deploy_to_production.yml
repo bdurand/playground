@@ -5,8 +5,6 @@ on:
   workflow_dispatch:
   release:
     types:
-      - released
-      - published
       - created
       - edited
 
@@ -18,21 +16,39 @@ jobs:
       ref: ${{ steps.get_release.outputs.ref }}
       sha: ${{ steps.get_release.outputs.sha }}
     steps:
-      - name: debug
-        run: echo ${{ toJson(github.event) }}
+      - name: Check for latest release
+        id: check-for-latest-release
+        uses: actions/github-script@v6
+        with:
+          script: |
+            console.log(context)
+            let latest = false;
+            const { data: latestRelease } = await github.repos.getLatestRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+            if (latestRelease.tag_name === context.ref) {
+              latest = true;
+            }
+
+            core.notice(`Latest release: ${latest}`);
+            core.setOutput('latest', latest);
       - name: Load local GitHub actions
         uses: actions/checkout@v3
+        if: ${{ steps.check-for-latest-release.outputs.latest == 'true' }}
         with:
           sparse-checkout: .github
       - name: Get release SHA
         id: get_release
         uses: ./.github/actions/get-release-sha
+        if: ${{ steps.check-for-latest-release.outputs.latest == 'true' }}
         with:
           tag: ${{ github.event.inputs.tag || github.event.release.tag_name }}
   build-image:
     name: Build Docker image
     runs-on: ubuntu-latest
     needs: get-release
+    if: ${{ needs.get-release.outputs.sha }}
     concurrency:
       group: "Build Docker image ${{ needs.get-release.outputs.sha }}"
     steps:
@@ -51,6 +67,7 @@ jobs:
     needs:
       - get-release
       - build-image
+    if: ${{ needs.get-release.outputs.sha }}
     concurrency:
       group: "Deploy to production"
       cancel-in-progress: true
