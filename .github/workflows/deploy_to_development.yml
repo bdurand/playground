@@ -22,13 +22,12 @@ jobs:
     concurrency:
       group: "Build Docker Image ${{ github.sha }}"
     steps:
-      - name: Check environment
+      - name: Invalid environment
+        if: github.event.inputs.environment == '-'
         uses: actions/github-script@v6
         with:
           script: |
-            if (github.event.inputs.environment === '-') {
-              core.setFailed('Environment is required');
-            }
+            core.setFailed('Environment is required');
       - name: Load local GitHub actions
         uses: actions/checkout@v3
         with:
