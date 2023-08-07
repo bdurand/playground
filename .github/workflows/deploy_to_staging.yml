@@ -49,6 +49,8 @@ jobs:
 
             if (context.ref !== ref) {
               core.notice(`Not deploying to staging; current staging branch is ${buildBranch}`);
+              ref = null;
+              sha = null;
             }
 
             core.setOutput('ref', ref)
@@ -57,7 +59,7 @@ jobs:
     name: Build Docker image
     runs-on: ubuntu-latest
     needs: get-branch
-    if: needs.get-branch.outputs.sha != ''
+    if: needs.get-branch.outputs.sha
     concurrency:
       group: "Build Docker image ${{ needs.get-branch.outputs.sha }}"
     steps:
@@ -72,7 +74,7 @@ jobs:
   deploy:
     name: Deploy to staging
     runs-on: ubuntu-latest
-    if: needs.get-branch.outputs.sha != ''
+    if: needs.get-branch.outputs.sha
     needs:
       - get-branch
       - build-image
