@@ -11,6 +11,8 @@ runs:
   steps:
     - name: Build Image
       uses: actions/github-script@v6
+      env:
+        SHA: ${{ inputs.sha }}
       with:
         script: |
-          core.notice(`Building Docker image for ${context.sha}`);
+          core.notice(`Building Docker image for ${process.env.SHA}`);
