@@ -1,5 +1,7 @@
 name: Merge a branch into another branch
-description: Gets the name of the current release-candidate branch.
+description: |
+  Handles merging code to the upstream branch. Opens a pull request if there is merge conflict.
+  This requires a GitHub token with permission to override any branch protection rules.
 
 inputs:
   source-branch:
