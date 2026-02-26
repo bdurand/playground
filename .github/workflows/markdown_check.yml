@@ -6,8 +6,6 @@ on:
       - opened
       - reopened
       - synchronize
-    paths:
-      - "**/*.md"
   workflow_dispatch:
 
 jobs:
@@ -15,7 +13,25 @@ jobs:
     name: Markdown Check
     runs-on: ubuntu-latest
     steps:
+      - name: Detect markdown changes
+        id: changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "has_markdown=true" >> $GITHUB_OUTPUT
+          else
+            COUNT=$(gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files \
+              --paginate --jq '[.[] | select(.filename | endswith(".md"))] | length')
+            if [ "$COUNT" -gt 0 ]; then
+              echo "has_markdown=true" >> $GITHUB_OUTPUT
+            else
+              echo "has_markdown=false" >> $GITHUB_OUTPUT
+            fi
+          fi
+
       - name: Check
         id: check
+        if: steps.changed.outputs.has_markdown == 'true'
         run: |
           echo "Checking markdown files for errors..."
